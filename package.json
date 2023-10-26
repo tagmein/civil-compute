@@ -19,6 +19,8 @@
   "highlight.js": "^11.9.0"
  },
  "devDependencies": {
-  "esbuild": "^0.19.5"
+  "@cloudflare/workers-types": "^4.20231025.0",
+  "esbuild": "^0.19.5",
+  "typescript": "^5.2.2"
  }
 }
