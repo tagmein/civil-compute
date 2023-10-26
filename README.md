@@ -1,1 +1,3 @@
-# Tag Me In
+# Civil Compute
+
+A platform for hosting web applications.
