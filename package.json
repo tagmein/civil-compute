@@ -1,7 +1,7 @@
 {
  "scripts": {
-  "compile": "esbuild src/index.ts --bundle --resolve-extensions=.ts --outfile=public/app/main.js",
-  "compile:watch": "rm -rf public/app/* && esbuild src/index.ts --watch --bundle --resolve-extensions=.ts --outfile=public/app/main.js",
+  "build": "esbuild src/index.ts --bundle --resolve-extensions=.ts --outfile=public/app/main.js",
+  "build:watch": "rm -rf public/app/* && esbuild src/index.ts --watch --bundle --resolve-extensions=.ts --outfile=public/app/main.js",
   "start": "python -m http.server 8123 -d public"
  },
  "dependencies": {

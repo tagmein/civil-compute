@@ -11,6 +11,8 @@ import {
  StarryUITheme,
  applyTheme,
  applyThemeMultiple,
+ attachStyle,
+ attachThemeFacet,
  attachThemeVariables,
 } from '@starryui/theme'
 
@@ -21,6 +23,28 @@ export function home(
   theme,
   page
  )
+
+ const arrowStyle = attachStyle(
+  theme,
+  '.arrow-next',
+  {
+   alignSelf: 'flex-end',
+   fontSize: '48px',
+   maxWidth: '24px',
+   overflow: 'hidden',
+   textAlign: 'right',
+   textIndent: '-24px',
+  }
+ )
+
+ function arrowNext() {
+  const arrow =
+   document.createElement('div')
+  arrow.classList.add('arrow-next')
+  arrow.innerHTML = '&rarr;'
+  return arrow
+ }
+
  return themedPage({
   title: 'Home',
   content(container, config) {
@@ -30,12 +54,15 @@ export function home(
     container,
     theme.variables
    )
-   const [themedRow] =
-    applyThemeMultiple(theme, [
-     row,
-     column,
-     frame,
-    ])
+   const [
+    themedRow,
+    themedColumn,
+    themedFrame,
+   ] = applyThemeMultiple(theme, [
+    row,
+    column,
+    frame,
+   ])
    const topArea = themedRow({
     style: {
      alignItems: 'center',
@@ -79,10 +106,172 @@ export function home(
     themeFacets: ['opaque'],
    })
 
+   function headerText(text: string) {
+    const h4 =
+     document.createElement('h4')
+    h4.textContent = text
+    return h4
+   }
+
+   const entries = themedColumn({
+    style: {
+     alignItems: 'center',
+     borderBottom:
+      '1px solid var(--theme2)',
+     flexGrow: '0',
+     gap: '20px',
+     justifyContent: 'space-evenly',
+     padding:
+      '0 var(--dimension4) var(--dimension3) ',
+    },
+    themeFacets: ['document', 'opaque'],
+   })
+
+   for (const {
+    description,
+    href,
+    name,
+   } of [
+    {
+     name: 'About',
+     description:
+      'Learn about Civil Compute',
+     href: '/#/about',
+    },
+    {
+     name: 'Directory',
+     description:
+      'Browse the public application repository',
+     href: '/#/directory',
+    },
+    {
+     name: 'Projects',
+     description:
+      'Get to work solo or with a team',
+     href: '/#/projects',
+    },
+    {
+     name: 'Teams',
+     description:
+      'Teams are groups of people that collaborate on projects',
+     href: '/#/teams',
+    },
+   ]) {
+    const frame = themedFrame({
+     href,
+     style: {
+      padding:
+       'var(--dimension3) var(--dimension4)',
+     },
+     tagName: 'a',
+    })
+    attachThemeFacet(
+     frame,
+     theme,
+     'link-frame'
+    )
+    frame.appendChild(headerText(name))
+    const descPara =
+     document.createElement('p')
+    descPara.textContent = description
+    frame.appendChild(descPara)
+    entries.appendChild(frame)
+   }
+   mainArea.appendChild(entries)
+
+   const quickLinks = themedRow({
+    style: {
+     alignItems: 'center',
+     borderBottom:
+      '1px solid var(--theme2)',
+     flexGrow: '0',
+     gap: '20px',
+     justifyContent: 'space-evenly',
+     padding:
+      '0 var(--dimension4) var(--dimension3) ',
+    },
+    themeFacets: ['document', 'opaque'],
+   })
+
+   for (const {
+    description,
+    href,
+    name,
+   } of [
+    {
+     name: 'Start a new project',
+     description:
+      'Build a web application from scratch',
+     href: '/#/projects/new',
+    },
+    {
+     name: 'Community',
+     description:
+      'Discuss Civil Compute with your peers from around the world',
+     href: '/#/community',
+    },
+    {
+     name: 'Create a team',
+     description:
+      'Assemble your people',
+     href: '/#/teams/new',
+    },
+    {
+     name: 'Publish',
+     description:
+      'Ready for users? Publish your application to the directory',
+     href: '/#/directory/publish',
+    },
+   ]) {
+    const frame = themedFrame({
+     href,
+     style: {
+      display: 'flex',
+      flexDirection: 'column',
+      padding:
+       'var(--dimension3) var(--dimension4)',
+     },
+     tagName: 'a',
+    })
+    attachThemeFacet(
+     frame,
+     theme,
+     'link-frame'
+    )
+    frame.appendChild(headerText(name))
+    const descPara =
+     document.createElement('p')
+    descPara.textContent = description
+    frame.appendChild(descPara)
+    const spacer =
+     document.createElement('div')
+    attachThemeFacet(
+     spacer,
+     theme,
+     'tray-spacer'
+    )
+    frame.appendChild(spacer)
+    frame.appendChild(arrowNext())
+    quickLinks.appendChild(frame)
+   }
+
+   const quickLinksHeader =
+    document.createElement('h3')
+   quickLinksHeader.textContent =
+    'What can I do?'
+   entries.appendChild(quickLinksHeader)
+
+   entries.appendChild(quickLinks)
+
    container.appendChild(mainArea)
 
    config?.startUpTasks?.initial?.push?.(
     function () {
+     if (arrowStyle) {
+      document.head.appendChild(
+       arrowStyle
+      )
+     }
      if (themeVariablesStyle) {
       document.head.appendChild(
        themeVariablesStyle
@@ -93,6 +282,11 @@ export function home(
 
    config?.cleanUpTasks?.final?.push(
     function () {
+     if (arrowStyle) {
+      document.head.removeChild(
+       arrowStyle
+      )
+     }
      if (themeVariablesStyle) {
       document.head.removeChild(
        themeVariablesStyle
