@@ -18,7 +18,10 @@ import {
 } from '@starryui/theme'
 import { themeMidnight } from '@starryui/theme-midnight'
 import { themeSandstone } from '@starryui/theme-sandstone'
-import { withTextContent } from '@starryui/traits'
+import {
+ withClick,
+ withTextContent,
+} from '@starryui/traits'
 import {
  tray,
  traySpacer,
@@ -154,6 +157,22 @@ export function mainTray(
  )
 
  container.appendChild(themeSwitcher)
+ container.appendChild(
+  themedButton.add(
+   withClick(
+    function toggleFullscreen() {
+     if (!document.fullscreenElement) {
+      document.body.requestFullscreen()
+     } else {
+      if (document.exitFullscreen) {
+       document.exitFullscreen()
+      }
+     }
+    }
+   ),
+   withTextContent('⛶')
+  )()
+ )
 
  function withBreadcrumb(
   path: string,
