@@ -1,7 +1,4 @@
-import {
- PagesFunction,
- Response,
-} from '@cloudflare/workers-types'
+import { PagesFunction } from '@cloudflare/workers-types'
 
 interface Env {
  CIVIL_DATA_KV: KVNamespace

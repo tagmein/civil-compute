@@ -1,12 +1,12 @@
+import type { PagesFunction } from '@cloudflare/workers-types'
 import {
- PagesFunction,
- Response,
-} from '@cloudflare/workers-types'
-import { compare, hash } from 'bcrypt'
-import { randomBytes } from 'crypto'
+ createHash,
+ randomBytes,
+} from 'node:crypto'
 
 interface Env {
  CIVIL_DATA_KV: KVNamespace
+ HASH_SALT: string
 }
 
 interface Body {
@@ -15,10 +15,33 @@ interface Body {
  'create-account': boolean
 }
 
+function hash(
+ data: string,
+ salt: string
+) {
+ return createHash('sha256')
+  .update(data + salt)
+  .digest('hex')
+}
+
+function compare(
+ data: string,
+ salt: string,
+ hashed: string
+) {
+ return (
+  createHash('sha256')
+   .update(data + salt)
+   .digest('hex') === hashed
+ )
+}
 export const onRequestPost: PagesFunction<Env> =
  async function (context) {
   const body: Body =
    await context.request.json()
+
+  const hash_salt =
+   context.env.HASH_SALT ?? ''
 
   const {
    access_token,
@@ -28,7 +51,8 @@ export const onRequestPost: PagesFunction<Env> =
    context.env.CIVIL_DATA_KV,
    body.username,
    body.password,
-   body['create-account']
+   body['create-account'],
+   hash_salt
   )
 
   if (error) {
@@ -63,7 +87,8 @@ async function createAuth(
  kv: KVNamespace,
  username: string,
  password: string,
- createAccount: boolean
+ createAccount: boolean,
+ hashSalt: string
 ) {
  const userKey = `#example/user-accounts/${username.toLowerCase()}`
  const userData = await kv.get(userKey)
@@ -72,17 +97,18 @@ async function createAuth(
   const { password_hash } =
    JSON.parse(userData)
   if (
-   !(await compare(
+   !compare(
     password,
+    hashSalt,
     password_hash
-   ))
+   )
   ) {
    return { error: 'Invalid password' }
   }
  } else if (createAccount) {
-  const passwordHash = await hash(
+  const passwordHash = hash(
    password,
-   10
+   hashSalt
   )
   await kv.put(
    userKey,
@@ -98,9 +124,9 @@ async function createAuth(
 
  const accessToken =
   randomBytes(48).toString('hex')
- const accessTokenHash = await hash(
+ const accessTokenHash = hash(
   accessToken,
-  10
+  hashSalt
  )
 
  const expiresAt =
