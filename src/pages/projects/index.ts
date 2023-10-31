@@ -9,6 +9,7 @@ import {
  attachThemeVariables,
 } from '@starryui/theme'
 import { authGuard } from '../../components/authGuard'
+import { kvdbBrowser } from '../../components/kvdbBrowser'
 import { User } from '../../lib/auth'
 
 export function projects(
@@ -39,18 +40,12 @@ export function projects(
    authGuard(
     mainArea,
     theme,
-    (user: User) => {
-     const loggedIn =
-      document.createElement('h2')
-     loggedIn.textContent =
-      user.username + "'s Projects"
-     return {
-      element: loggedIn,
-      destroy() {
-       loggedIn.remove()
-      },
-     }
-    }
+    (user: User) =>
+     kvdbBrowser(
+      theme,
+      user,
+      `users/${user.username}`
+     )
    )
 
    config?.startUpTasks?.initial?.push?.(

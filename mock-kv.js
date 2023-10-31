@@ -56,6 +56,14 @@ async function main() {
       JSON.stringify(requestParams)
      )
      switch (request.method) {
+      case 'DELETE':
+       response.statusCode = 200
+       response.end(
+        MEMORY.delete(
+         requestParams.key
+        ).toString()
+       )
+       return
       case 'GET':
        response.statusCode = 200
        response.end(
@@ -120,14 +128,19 @@ async function main() {
    console.log('')
    console.log(' • Read value at key')
    console.log(
-    '   GET ?key=urlEncodedKey'
+    '      GET ?key=urlEncodedKey'
+   )
+   console.log('')
+   console.log(' • Delete value at key')
+   console.log(
+    '   DELETE ?key=urlEncodedKey'
    )
    console.log('')
    console.log(
     ' • Write value at key (expires in 60 seconds)'
    )
    console.log(
-    '   POST ?key=urlEncodedKey&expiration_ttl=60 <body>'
+    '     POST ?key=urlEncodedKey&expiration_ttl=60 <body>'
    )
    console.log('')
   }

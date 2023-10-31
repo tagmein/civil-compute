@@ -17,7 +17,7 @@ interface KVDBDirectory {
   ): Promise<KVDBDirectory>
   delete(name: string): Promise<boolean>
   exists(name: string): Promise<boolean>
-  list(): Promise<string[]>
+  list(name: string): Promise<string[]>
   read(
    name: string
   ): Promise<KVDBDirectory>
@@ -30,7 +30,7 @@ interface KVDBDirectory {
   ): Promise<KVDBPage>
   delete(name: string): Promise<boolean>
   exists(name: string): Promise<boolean>
-  list(): Promise<string[]>
+  list(name: string): Promise<string[]>
   read(name: string): Promise<KVDBPage>
   save(
    name: string,
@@ -48,6 +48,11 @@ interface KVDBNamespace {
 export function validateName(
  name: string
 ) {
+ if (name.trim().length === 0) {
+  throw new Error(
+   'Name must contain at least one non-whitespace character'
+  )
+ }
  if (
   name.includes('#') ||
   name.includes('/')
@@ -64,6 +69,12 @@ function buildDirectory(
  basePath: string,
  name: string
 ): KVDBDirectory {
+ async function getList(key: string) {
+  return JSON.parse(
+   (await kvNamespace.get(key)) || '[]'
+  )
+ }
+
  const thisDirectory: KVDBDirectory = {
   name,
   directory: {
@@ -99,14 +110,15 @@ function buildDirectory(
      )
 
      const listKey = `${namespace}#${basePath}#list-dir`
-     const dirs =
-      (await kvNamespace.get<string[]>(
-       listKey
-      )) || []
-     dirs.push(name)
+     const dirs = new Set(
+      await getList(listKey)
+     )
+     dirs.add(name)
      await kvNamespace.put(
       listKey,
-      JSON.stringify(dirs)
+      JSON.stringify(
+       Array.from(dirs).sort()
+      )
      )
 
      return buildDirectory(
@@ -140,14 +152,22 @@ function buildDirectory(
 
      // Delete sub pages
      const pages =
-      await subDir.page.list()
+      await subDir.page.list(
+       [basePath, name]
+        .filter((x) => x.length)
+        .join('/')
+      )
      for (const page of pages) {
       await subDir.page.delete(page)
      }
 
      // Delete sub directories
      const subdirs =
-      await subDir.directory.list()
+      await subDir.directory.list(
+       [basePath, name]
+        .filter((x) => x.length)
+        .join('/')
+      )
      for (const dir of subdirs) {
       await subDir.directory.delete(dir)
      }
@@ -159,7 +179,11 @@ function buildDirectory(
 
      // Update parent list
      let siblings =
-      await thisDirectory.directory.list()
+      await thisDirectory.directory.list(
+       [basePath, name]
+        .filter((x) => x.length)
+        .join('/')
+      )
      siblings = siblings.filter(
       (d) => d !== name
      )
@@ -206,13 +230,13 @@ function buildDirectory(
     )
    },
 
-   async list() {
-    const listKey = `${namespace}#${basePath}#list-dir`
+   async list(name: string) {
+    const fullPath = [basePath, name]
+     .filter((x) => x.length)
+     .join('/')
+    const listKey = `${namespace}#${fullPath}#list-dir`
 
-    const dirs =
-     (await kvNamespace.get<string[]>(
-      listKey
-     )) || []
+    const dirs = await getList(listKey)
 
     return dirs
    },
@@ -265,6 +289,14 @@ function buildDirectory(
     }
     try {
      const pageKey = `${namespace}#${basePath}/${name}#page`
+
+     const existing =
+      await kvNamespace.get(pageKey)
+
+     if (existing) {
+      return JSON.parse(existing)
+     }
+
      await kvNamespace.put(
       pageKey,
       JSON.stringify({
@@ -275,14 +307,15 @@ function buildDirectory(
      )
 
      const listKey = `${namespace}#${basePath}#list-page`
-     const pages =
-      (await kvNamespace.get<string[]>(
-       listKey
-      )) || []
-     pages.push(name)
+     const pages = new Set(
+      await getList(listKey)
+     )
+     pages.add(name)
      await kvNamespace.put(
       listKey,
-      JSON.stringify(pages)
+      JSON.stringify(
+       Array.from(pages).sort()
+      )
      )
 
      return { name, content, url }
@@ -324,13 +357,12 @@ function buildDirectory(
     }
    },
 
-   async list() {
-    const listKey = `${namespace}#${basePath}#list-page`
-    return (
-     (await kvNamespace.get<string[]>(
-      listKey
-     )) || []
-    )
+   async list(name: string) {
+    const fullPath = [basePath, name]
+     .filter((x) => x.length)
+     .join('/')
+    const listKey = `${namespace}#${fullPath}#list-page`
+    return await getList(listKey)
    },
 
    async exists(name) {

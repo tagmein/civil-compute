@@ -193,6 +193,12 @@ export async function createAuth(
    return { error: 'Invalid password' }
   }
  } else if (createAccount) {
+  if (1 > 0) {
+   return {
+    error:
+     'Account creation temporarily suspended',
+   }
+  }
   const passwordHash = hash(
    password,
    hashSalt

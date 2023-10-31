@@ -31,7 +31,7 @@ export const onRequestGet: PagesFunction<
 
   switch (operation) {
    case 'directory.exists':
-    if (!name) {
+    if (typeof name !== 'string') {
      throw Error(
       'Name required for directory.exists'
      )
@@ -45,7 +45,7 @@ export const onRequestGet: PagesFunction<
     }
 
    case 'directory.read':
-    if (!name) {
+    if (typeof name !== 'string') {
      throw Error(
       'Name required for directory.read'
      )
@@ -57,17 +57,17 @@ export const onRequestGet: PagesFunction<
     })
 
    case 'directory.list':
-    if (name) {
+    if (typeof name !== 'string') {
      throw Error(
-      'Name should not be provided for directory.list'
+      'Name required for directory.list'
      )
     }
     const dirs =
-     await db.root.directory.list()
+     await db.root.directory.list(name)
     return createResponse({ dirs })
 
    case 'page.exists':
-    if (!name) {
+    if (typeof name !== 'string') {
      throw Error(
       'Name required for page.exists'
      )
@@ -79,7 +79,7 @@ export const onRequestGet: PagesFunction<
     }
 
    case 'page.read':
-    if (!name) {
+    if (typeof name !== 'string') {
      throw Error(
       'Name required for page.read'
      )
@@ -89,13 +89,13 @@ export const onRequestGet: PagesFunction<
     return createResponse({ page })
 
    case 'page.list':
-    if (name) {
+    if (typeof name !== 'string') {
      throw Error(
-      'Name should not be provided for page.list'
+      'Name required for page.list'
      )
     }
     const pages =
-     await db.root.page.list()
+     await db.root.page.list(name)
     return createResponse({ pages })
 
    default:
@@ -107,6 +107,11 @@ export const onRequestGet: PagesFunction<
     )
   }
  } catch (err) {
+  console.error(
+   request.method,
+   request.url,
+   err
+  )
   return createResponse(
    {
     error: err.message,
@@ -145,7 +150,7 @@ export const onRequestPost: PagesFunction<
    'operation'
   ) as Operation
 
-  if (!name) {
+  if (typeof name !== 'string') {
    return createResponse(
     {
      error: 'name is required',
@@ -269,6 +274,11 @@ export const onRequestPost: PagesFunction<
     )
   }
  } catch (err) {
+  console.error(
+   request.method,
+   request.url,
+   err
+  )
   return createResponse(
    {
     error: err.message,

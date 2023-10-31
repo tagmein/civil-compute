@@ -2,6 +2,9 @@ const MOCK_KV_URL =
  'http://localhost:3333'
 
 type MockKV = {
+ delete: (
+  key: string
+ ) => Promise<boolean>
  get: (
   key: string
  ) => Promise<string | undefined>
@@ -19,6 +22,18 @@ function createMockKV(): MockKV {
     `?key=${encodeURIComponent(key)}`
   )
   return response.text()
+ }
+ const _delete = async (
+  key: string
+ ) => {
+  const response = await fetch(
+   MOCK_KV_URL +
+    `?key=${encodeURIComponent(key)}`,
+   { method: 'delete' }
+  )
+  return (
+   (await response.text()) === 'true'
+  )
  }
 
  const put = async (
@@ -52,7 +67,7 @@ function createMockKV(): MockKV {
   }
  }
 
- return { get, put }
+ return { delete: _delete, get, put }
 }
 
 export function mockMissingKV(

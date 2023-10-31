@@ -32,10 +32,13 @@ Server listening on http://localhost:3333
 Available operations:
 
  • Read value at key
-   GET ?key=urlEncodedKey
+      GET ?key=urlEncodedKey
+
+ • Delete value at key
+   DELETE ?key=urlEncodedKey
 
  • Write value at key (expires in 60 seconds)
-   POST ?key=urlEncodedKey&expiration_ttl=60 <body>
+     POST ?key=urlEncodedKey&expiration_ttl=60 <body>
 
 ```
 

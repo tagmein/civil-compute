@@ -1,12 +1,12 @@
 import { getAccessToken } from './auth'
 
-interface KVDBPage {
+export interface KVDBPage {
  name: string
  content?: string
  url?: string
 }
 
-interface KVDBDirectory {
+export interface KVDBDirectory {
  name: string
 }
 
@@ -57,7 +57,7 @@ export function kvdb(namespace = '') {
   params.set('namespace', namespace)
   params.set('operation', operation)
 
-  if (name) {
+  if (typeof name === 'string') {
    params.set('name', name)
   }
 
@@ -113,9 +113,10 @@ export function kvdb(namespace = '') {
     ) as Promise<DirectoryReadResponse>
    },
 
-   async list() {
+   async list(path: string[]) {
     return request(
-     'directory.list'
+     'directory.list',
+     path.join('/')
     ) as Promise<DirectoryListResponse>
    },
 
@@ -151,9 +152,10 @@ export function kvdb(namespace = '') {
     ) as Promise<PageReadResponse>
    },
 
-   async list() {
+   async list(path: string[]) {
     return request(
-     'page.list'
+     'page.list',
+     path.join('/')
     ) as Promise<PageListResponse>
    },
 
