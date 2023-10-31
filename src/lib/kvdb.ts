@@ -1,3 +1,5 @@
+import { getAccessToken } from './auth'
+
 interface KVDBPage {
  name: string
  content?: string
@@ -8,8 +10,16 @@ interface KVDBDirectory {
  name: string
 }
 
+interface DeletedResponse {
+ deleted: boolean
+}
+
 interface ExistsResponse {
  exists: boolean
+}
+
+interface SavedResponse {
+ saved: boolean
 }
 
 interface DirectoryReadResponse {
@@ -28,12 +38,21 @@ interface PageListResponse {
  pages: string[]
 }
 
+export type KVDBResponse =
+ | DeletedResponse
+ | ExistsResponse
+ | DirectoryReadResponse
+ | PageReadResponse
+ | DirectoryListResponse
+ | PageListResponse
+ | SavedResponse
+
 export function kvdb(namespace = '') {
  async function request(
   operation: string,
   name?: string,
   body?: object
- ): Promise<any> {
+ ): Promise<KVDBResponse> {
   const params = new URLSearchParams()
   params.set('namespace', namespace)
   params.set('operation', operation)
@@ -42,25 +61,33 @@ export function kvdb(namespace = '') {
    params.set('name', name)
   }
 
-  let url = '/data?' + params
-  let response
+  const Authorization = getAccessToken()
+  const url = '/data?' + params
+  const response = body
+   ? await fetch(url, {
+      method: 'POST',
+      headers: {
+       ...(Authorization
+        ? { Authorization }
+        : {}),
+       'Content-Type':
+        'application/json',
+      },
+      body: JSON.stringify(body),
+     })
+   : await fetch(url)
 
-  if (body) {
-   response = await fetch(url, {
-    method: 'POST',
-    headers: {
-     'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-   })
-  } else {
-   response = await fetch(
-    url + '?' + params
+  if (!response.ok) {
+   throw new Error(
+    `HTTP ${response.status} ${
+     response.statusText
+    } ${body ? 'POST' : 'GET'} ${url}`
    )
   }
 
   return response.json()
  }
+
  return {
   directory: {
    async create(name: string) {
@@ -68,7 +95,7 @@ export function kvdb(namespace = '') {
      'directory.create',
      name,
      { name }
-    ) as Promise<KVDBDirectory>
+    ) as Promise<DirectoryReadResponse>
    },
 
    async delete(name: string) {
@@ -76,7 +103,7 @@ export function kvdb(namespace = '') {
      'directory.delete',
      name,
      {}
-    ) as Promise<boolean>
+    ) as Promise<DeletedResponse>
    },
 
    async read(name: string) {
@@ -106,7 +133,7 @@ export function kvdb(namespace = '') {
      'page.create',
      page.name,
      page
-    ) as Promise<KVDBPage>
+    ) as Promise<PageReadResponse>
    },
 
    async delete(name: string) {
@@ -114,7 +141,7 @@ export function kvdb(namespace = '') {
      'page.delete',
      name,
      {}
-    ) as Promise<boolean>
+    ) as Promise<DeletedResponse>
    },
 
    async read(name: string) {
@@ -142,7 +169,7 @@ export function kvdb(namespace = '') {
      'page.save',
      page.name,
      page
-    ) as Promise<KVDBPage>
+    ) as Promise<SavedResponse>
    },
   },
  }

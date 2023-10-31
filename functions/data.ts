@@ -1,29 +1,18 @@
 import type { PagesFunction } from '@cloudflare/workers-types'
+import { getUserSession } from './lib/auth'
+import { createResponse } from './lib/createResponse'
 import { kvdb } from './lib/kvdb'
+import { mockMissingKV } from './lib/mockMissingKV'
 
 interface Env {
  CIVIL_DATA_KV: KVNamespace
-}
-
-function createResponse(
- data: boolean | object,
- options: { status?: number } = {}
-) {
- return new Response(
-  JSON.stringify(data),
-  {
-   status: options.status || 200,
-   headers: {
-    'Content-Type': 'application/json',
-   },
-   ...options,
-  }
- )
+ HASH_SALT: string
 }
 
 export const onRequestGet: PagesFunction<
  Env
 > = async ({ env, request }) => {
+ mockMissingKV(env, 'CIVIL_DATA_KV')
  try {
   const params = new URL(request.url)
    .searchParams
@@ -144,8 +133,8 @@ type Body = {
 export const onRequestPost: PagesFunction<
  Env
 > = async ({ env, request }) => {
+ mockMissingKV(env, 'CIVIL_DATA_KV')
  try {
-  const userNamespace = 'users/example'
   const params = new URL(request.url)
    .searchParams
   const name = params.get('name')
@@ -156,10 +145,60 @@ export const onRequestPost: PagesFunction<
    'operation'
   ) as Operation
 
-  if (
-   namespace &&
-   !namespace.startsWith(userNamespace)
-  ) {
+  if (!name) {
+   return createResponse(
+    {
+     error: 'name is required',
+    },
+    { status: 400 }
+   )
+  }
+
+  if (namespace.includes('#')) {
+   return createResponse(
+    {
+     error:
+      'namespace is invalid, cannot contain #',
+    },
+    { status: 400 }
+   )
+  }
+
+  const access_token =
+   request.headers.get('Authorization')
+  if (!access_token) {
+   return createResponse(
+    { error: 'unauthorized' },
+    {
+     status: 401,
+    }
+   )
+  }
+  const hash_salt = env.HASH_SALT ?? ''
+  const { user } = await getUserSession(
+   env.CIVIL_DATA_KV,
+   access_token,
+   hash_salt
+  )
+
+  if (!user) {
+   return createResponse(
+    { error: 'unauthorized' },
+    {
+     status: 401,
+    }
+   )
+  }
+
+  const userNamespace = `users/${user.username}`
+
+  const userCanMutateNamespace =
+   namespace === userNamespace ||
+   namespace.startsWith(
+    `${userNamespace}/`
+   )
+
+  if (!userCanMutateNamespace) {
    return createResponse(
     { error: 'forbidden' },
     { status: 403 }
@@ -216,7 +255,7 @@ export const onRequestPost: PagesFunction<
 
    case 'page.delete': {
     const deleted =
-     db.root.page.delete(name)
+     await db.root.page.delete(name)
     return createResponse({ deleted })
    }
    // Default
