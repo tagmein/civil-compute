@@ -444,10 +444,13 @@ function openCreateModal(
 
  let action = 'create'
 
+ cancel.setAttribute('type', 'reset')
+
  cancel.addEventListener(
   'click',
   function () {
    action = 'cancel'
+   modal.requestSubmit()
   }
  )
 
