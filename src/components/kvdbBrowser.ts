@@ -384,7 +384,7 @@ function openCreateModal(
   document.createElement('div')
  overlay.style.backgroundColor =
   '#80808080'
- overlay.style.position = 'absolute'
+ overlay.style.position = 'fixed'
  overlay.style.top = '0'
  overlay.style.left = '0'
  overlay.style.right = '0'
@@ -404,7 +404,7 @@ function openCreateModal(
   backgroundColor: 'var(--theme3)',
   border: '1px solid var(--theme4)',
   padding: 'var(--dimension3)',
-  margin: '50% auto',
+  margin: '50vh auto',
   maxWidth: '240px',
   transform: 'translateY(-50%)',
  })
