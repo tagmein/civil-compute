@@ -140,7 +140,7 @@ function createAuthForm(
   document.createElement('input')
  passwordInput.type = 'password'
  passwordInput.name = 'password'
- usernameInput.setAttribute(
+ passwordInput.setAttribute(
   'placeholder',
   'password'
  )
