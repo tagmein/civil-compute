@@ -7,12 +7,7 @@ import {
 import { withTextContent } from '@starryui/traits'
 import { User } from '../lib/auth'
 import { kvdb } from '../lib/kvdb'
-
-interface Breadcrumb {
- label: string
- path: string[]
- element: HTMLElement
-}
+import { breadcrumbNavigator } from './breadcrumbNavigator'
 
 export function kvdbBrowser(
  theme: StarryUITheme,
@@ -22,34 +17,31 @@ export function kvdbBrowser(
  const [themedButton] =
   applyThemeMultiple(theme, [button])
  const stylesheets: HTMLStyleElement[] =
-  []
- stylesheets.push(
-  attachStyle(
-   theme,
-   '.kvdbBrowser_container',
-   {
-    display: 'flex',
-    flexDirection: 'row',
-    flexGrow: '1',
-   }
-  )
- )
- stylesheets.push(
-  attachStyle(
-   theme,
-   '.primary-action',
-   [
+  [
+   attachStyle(
+    theme,
+    '.kvdbBrowser_container',
     {
-     '': {
-      backgroundColor: '#306060',
+     display: 'flex',
+     flexDirection: 'row',
+     flexGrow: '1',
+    }
+   ),
+   attachStyle(
+    theme,
+    '.primary-action',
+    [
+     {
+      '': {
+       backgroundColor: '#306060',
+      },
+      '&:hover': {
+       backgroundColor: '#50a0a0',
+      },
      },
-     '&:hover': {
-      backgroundColor: '#50a0a0',
-     },
-    },
-   ]
-  )
- )
+    ]
+   ),
+  ]
  const kvdbInstance = kvdb(namespace)
  const container =
   document.createElement('div')
@@ -91,16 +83,11 @@ export function kvdbBrowser(
 
  // Breadcrumbs
  const breadcrumbs =
-  document.createElement('div')
- Object.assign(breadcrumbs.style, {
-  borderBottom:
-   '1px solid var(--theme4)',
-  display: 'flex',
-  alignItems: 'flex-start',
-  height: '38px',
-  overflowX: 'auto',
-  overflowY: 'hidden',
- })
+  breadcrumbNavigator(
+   theme,
+   namespace,
+   loadDirectory
+  )
 
  // Directories
  const directoriesElement =
@@ -196,7 +183,7 @@ export function kvdbBrowser(
 
  content.append(
   menu,
-  breadcrumbs,
+  breadcrumbs.element,
   directoriesHeader,
   directoriesElement,
   pagesHeader,
@@ -271,93 +258,28 @@ export function kvdbBrowser(
    pagesElement.textContent = 'No pages'
   }
   // Update breadcrumbs
-  breadcrumbs.textContent = ''
-  const crumbs = renderBreadcrumbs(path)
-  crumbs.forEach((crumb) => {
-   breadcrumbs.appendChild(
-    crumb.element
-   )
-  })
- }
+  breadcrumbs.setPath(path)
 
- function renderBreadcrumbs(
-  path: string[]
- ): Breadcrumb[] {
-  const crumbs: Breadcrumb[] = [
-   {
-    label: 'Root',
-    path: [],
-    element:
-     path.length === 0
-      ? createBreadcrumb(namespace)
-      : createBreadcrumb(
-         namespace,
-         function () {
-          loadDirectory([])
-         }
-        ),
-   },
-  ]
-
-  crumbs[0].element.textContent =
-   namespace
-
-  path.forEach((dir) => {
-   const crumb = {
-    label: dir,
-    path: [
-     ...(crumbs[crumbs.length - 1]
-      .path ?? []),
-     dir,
-    ],
-    element: createBreadcrumb(
-     dir,
-     () => {
-      loadDirectory(crumb.path)
-     }
-    ),
-   }
-   crumbs.push(crumb)
-  })
-
-  return crumbs
- }
-
- function createBreadcrumb(
-  label: string,
-  onClick?: () => void
- ) {
-  const bc =
-   document.createElement('span')
-  bc.textContent = label
-  bc.style.cursor = 'pointer'
-  bc.style.padding = 'var(--dimension2)'
-  bc.style.display = 'block'
-  if (onClick) {
-   bc.addEventListener('click', onClick)
+  function renderDirectory(
+   dir: string
+  ) {
+   const div =
+    document.createElement('div')
+   div.textContent = dir
+   return div
   }
 
-  return bc
+  function renderPage(page: string) {
+   const div =
+    document.createElement('div')
+   div.textContent = page
+   return div
+  }
  }
-
- function renderDirectory(dir: string) {
-  const div =
-   document.createElement('div')
-  div.textContent = dir
-  return div
- }
-
- function renderPage(page: string) {
-  const div =
-   document.createElement('div')
-  div.textContent = page
-  return div
- }
-
  container.append(sidebar, content)
-
  function destroy() {
   container.remove()
+  breadcrumbs.destroy()
   for (const sheet of stylesheets) {
    document.head.removeChild(sheet)
   }
