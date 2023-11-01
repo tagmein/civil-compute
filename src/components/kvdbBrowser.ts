@@ -8,6 +8,10 @@ import { withTextContent } from '@starryui/traits'
 import { User } from '../lib/auth'
 import { kvdb } from '../lib/kvdb'
 import { breadcrumbNavigator } from './breadcrumbNavigator'
+import {
+ Modal,
+ openModal,
+} from './openModal'
 
 export function kvdbBrowser(
  theme: StarryUITheme,
@@ -276,6 +280,7 @@ export function kvdbBrowser(
    return div
   }
  }
+
  container.append(sidebar, content)
  function destroy() {
   container.remove()
@@ -288,7 +293,6 @@ export function kvdbBrowser(
 }
 
 // Create Modal
-
 function openCreateModal(
  theme: StarryUITheme,
  title: string,
@@ -298,121 +302,88 @@ function openCreateModal(
 ) {
  const [themedButton] =
   applyThemeMultiple(theme, [button])
- const modal =
-  document.createElement('form')
- modal.tabIndex = 0
 
- const overlay =
-  document.createElement('div')
- overlay.style.backgroundColor =
-  '#80808080'
- overlay.style.position = 'fixed'
- overlay.style.top = '0'
- overlay.style.left = '0'
- overlay.style.right = '0'
- overlay.style.bottom = '0'
+ const nameInput = createNameInput()
 
- // Close on click
- overlay.addEventListener(
-  'click',
-  close
- )
-
- modal.addEventListener('click', (e) =>
-  e.stopPropagation()
- )
-
- Object.assign(modal.style, {
-  backgroundColor: 'var(--theme3)',
-  border: '1px solid var(--theme4)',
-  padding: 'var(--dimension3)',
-  margin: '50vh auto',
-  maxWidth: '240px',
-  transform: 'translateY(-50%)',
- })
-
- // Name input
- const nameInput =
-  document.createElement('input')
- Object.assign(nameInput.style, {
-  backgroundColor: 'var(--theme5)',
-  border: '1px solid var(--theme8)',
-  marginBottom: 'var(--dimension3)',
-  padding:
-   'var(--dimension1) var(--dimension2)',
- })
- nameInput.setAttribute(
-  'placeholder',
-  'Enter name'
- )
- setTimeout(
-  nameInput.focus.bind(nameInput)
- )
-
- // Buttons
- const buttons =
-  document.createElement('div')
- buttons.style.display = 'flex'
- buttons.style.gap = 'var(--dimension2)'
-
- const cancel = themedButton.add(
-  withTextContent('Cancel')
- )()
-
- const create = themedButton.add(
-  withTextContent('Create')
- )()
- create.classList.add('primary-action')
-
- let action = 'create'
-
- cancel.setAttribute('type', 'reset')
-
- cancel.addEventListener(
-  'click',
-  function () {
-   action = 'cancel'
-   modal.requestSubmit()
-  }
- )
-
- create.addEventListener(
-  'click',
-  function () {
-   action = 'create'
-  }
- )
-
- buttons.append(cancel, create)
-
- const header =
-  document.createElement('h3')
- header.textContent = title
- header.style.marginTop = '0'
- header.style.marginBottom =
-  'var(--dimension3)'
-
- modal.append(
-  header,
-  nameInput,
-  buttons
- )
-
- overlay.appendChild(modal)
- document.body.append(overlay)
-
- modal.addEventListener(
-  'submit',
-  async (e) => {
-   e.preventDefault()
-   if (action === 'create') {
-    await onSubmit(nameInput.value)
-   }
-   close()
-  }
- )
-
- function close() {
-  overlay.remove()
+ function createContent(modal: Modal) {
+  const buttons = createButtons()
+  const header = createHeader(title)
+  modal.element.append(
+   header,
+   nameInput,
+   buttons
+  )
  }
+
+ function createNameInput() {
+  const nameInput =
+   document.createElement('input')
+
+  nameInput.setAttribute(
+   'placeholder',
+   'Enter name'
+  )
+  nameInput.setAttribute(
+   'required',
+   'required'
+  )
+
+  nameInput.style.backgroundColor =
+   'var(--theme5)'
+  nameInput.style.border =
+   '1px solid var(--theme8)'
+  nameInput.style.marginBottom =
+   'var(--dimension3)'
+  nameInput.style.padding =
+   'var(--dimension1) var(--dimension2)'
+
+  return nameInput
+ }
+
+ function createButtons() {
+  // Existing button logic
+  const buttons =
+   document.createElement('div')
+  buttons.style.display = 'flex'
+  buttons.style.gap =
+   'var(--dimension2)'
+
+  const cancel = themedButton.add(
+   withTextContent('Cancel')
+  )()
+  cancel.setAttribute('type', 'reset')
+  cancel.addEventListener(
+   'click',
+   function () {
+    createModal.close()
+   }
+  )
+
+  const create = themedButton.add(
+   withTextContent('Create')
+  )()
+  create.classList.add('primary-action')
+  create.setAttribute('type', 'submit')
+
+  buttons.append(cancel, create)
+  return buttons
+ }
+
+ function createHeader(title: string) {
+  const header =
+   document.createElement('h3')
+  header.textContent = title
+  header.style.marginTop = '0'
+  header.style.marginBottom =
+   'var(--dimension3)'
+
+  return header
+ }
+ const createModal = openModal({
+  content: createContent,
+  async onSubmit() {
+   onSubmit(nameInput.value)
+   createModal.close()
+  },
+ })
 }
