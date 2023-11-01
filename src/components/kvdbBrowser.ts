@@ -8,6 +8,7 @@ import { withTextContent } from '@starryui/traits'
 import { User } from '../lib/auth'
 import { kvdb } from '../lib/kvdb'
 import { breadcrumbNavigator } from './breadcrumbNavigator'
+import { list } from './list'
 import {
  Modal,
  openModal,
@@ -94,21 +95,7 @@ export function kvdbBrowser(
   )
 
  // Directories
- const directoriesElement =
-  document.createElement('div')
- Object.assign(
-  directoriesElement.style,
-  {
-   padding: 'var(--dimension3)',
-  }
- )
-
- // Pages
- const pagesElement =
-  document.createElement('div')
- Object.assign(pagesElement.style, {
-  padding: 'var(--dimension3)',
- })
+ const directoriesList = list(theme)
  const directoriesHeader =
   document.createElement('h3')
  directoriesHeader.textContent =
@@ -123,7 +110,8 @@ export function kvdbBrowser(
    marginBottom: '0',
   }
  )
-
+ // Pages
+ const pagesList = list(theme)
  const pagesHeader =
   document.createElement('h3')
  pagesHeader.textContent = 'Pages'
@@ -189,9 +177,9 @@ export function kvdbBrowser(
   menu,
   breadcrumbs.element,
   directoriesHeader,
-  directoriesElement,
+  directoriesList.element,
   pagesHeader,
-  pagesElement
+  pagesList.element
  )
 
  // Load initial data
@@ -208,83 +196,47 @@ export function kvdbBrowser(
   }
   lastKnownPath = path
   // Fetch directories and pages
-  const dirList =
-   await kvdbInstance.directory.list(
-    path
-   )
-  const pageList =
-   await kvdbInstance.page.list(path)
+  await Promise.all(
+   [
+    async function () {
+     const dirList =
+      await kvdbInstance.directory.list(
+       path!
+      )
+     directoriesList.setItems(
+      dirList.dirs,
+      async function (dir) {
+       loadDirectory([...path!, dir])
+      }
+     )
+    },
+    async function () {
+     const pageList =
+      await kvdbInstance.page.list(
+       path!
+      )
 
-  // Render directories
-  directoriesElement.textContent = ''
-  for (const dir of dirList.dirs) {
-   const div = renderDirectory(dir)
-   Object.assign(div.style, {
-    backgroundColor: 'var(--theme4)',
-    border: '1px solid var(--theme4)',
-    borderRadius: 'var(--dimension3)',
-    cursor: 'pointer',
-    lineHeight: '28px',
-    margin: 'var(--dimension2) 0',
-    minHeight: '30px',
-    padding:
-     'var(--dimension1) calc(var(--dimension2) + var(--dimension1))',
-   })
-   div.addEventListener('click', () => {
-    loadDirectory([...path!, dir])
-   })
-   directoriesElement.appendChild(div)
-  }
-
-  // Render pages
-  pagesElement.textContent = ''
-  for (const page of pageList.pages) {
-   const div = renderPage(page)
-   Object.assign(div.style, {
-    backgroundColor: 'var(--theme4)',
-    border: '1px solid var(--theme4)',
-    borderRadius: 'var(--dimension3)',
-    cursor: 'pointer',
-    lineHeight: '28px',
-    margin: 'var(--dimension2) 0',
-    minHeight: '30px',
-    padding:
-     'var(--dimension1) calc(var(--dimension2) + var(--dimension1))',
-   })
-   pagesElement.appendChild(div)
-  }
-  if (dirList.dirs.length === 0) {
-   directoriesElement.textContent =
-    'No directories'
-  }
-
-  if (pageList.pages.length === 0) {
-   pagesElement.textContent = 'No pages'
-  }
-  // Update breadcrumbs
+     pagesList.setItems(
+      pageList.pages,
+      async function (page) {
+       console.log(
+        'should open page',
+        ...path!,
+        page
+       )
+      }
+     )
+    },
+   ].map((x) => x())
+  )
   breadcrumbs.setPath(path)
-
-  function renderDirectory(
-   dir: string
-  ) {
-   const div =
-    document.createElement('div')
-   div.textContent = dir
-   return div
-  }
-
-  function renderPage(page: string) {
-   const div =
-    document.createElement('div')
-   div.textContent = page
-   return div
-  }
  }
-
  container.append(sidebar, content)
  function destroy() {
   container.remove()
   breadcrumbs.destroy()
+  directoriesList.destroy()
+  pagesList.destroy()
   for (const sheet of stylesheets) {
    document.head.removeChild(sheet)
   }
@@ -379,6 +331,7 @@ function openCreateModal(
 
   return header
  }
+
  const createModal = openModal({
   content: createContent,
   async onSubmit() {
@@ -386,4 +339,6 @@ function openCreateModal(
    createModal.close()
   },
  })
+
+ return createModal
 }
