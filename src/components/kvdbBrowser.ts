@@ -201,7 +201,7 @@ export function kvdbBrowser(
        url: '',
       }
      )
-     loadDirectory()
+     loadDirectory(lastKnownPath)
     }
    )
   }

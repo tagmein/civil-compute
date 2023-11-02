@@ -1,3 +1,4 @@
 node_modules
 public/app
+.tmp-kv
 .wrangler
