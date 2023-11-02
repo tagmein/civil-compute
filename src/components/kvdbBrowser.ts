@@ -8,6 +8,7 @@ import { withTextContent } from '@starryui/traits'
 import { User } from '../lib/auth'
 import { kvdb } from '../lib/kvdb'
 import { breadcrumbNavigator } from './breadcrumbNavigator'
+import { editableList } from './editableList'
 import { list } from './list'
 import {
  Modal,
@@ -57,11 +58,38 @@ export function kvdbBrowser(
  // Sidebar
  const sidebar =
   document.createElement('div')
- sidebar.textContent =
-  '[TODO] hello ' + user.username
  Object.assign(sidebar.style, {
   backgroundColor: 'var(--theme2)',
   width: '240px',
+ })
+ const kvdbInstanceLists =
+  kvdbInstance.namespace('.lists')
+ const lovedList = editableList(
+  theme,
+  kvdbInstanceLists,
+  'Loved',
+  loadDirectory
+ )
+ sidebar.appendChild(lovedList.element)
+ // Content area
+ const contentContainer =
+  document.createElement('div')
+ Object.assign(contentContainer.style, {
+  flexGrow: '1',
+  overflow: 'hidden',
+  position: 'relative',
+ })
+
+ const contentScroll =
+  document.createElement('div')
+ Object.assign(contentScroll.style, {
+  overflowX: 'hidden',
+  overflowY: 'auto',
+  position: 'absolute',
+  top: '0',
+  left: '0',
+  right: '0',
+  bottom: '0',
  })
 
  // Content area
@@ -70,7 +98,6 @@ export function kvdbBrowser(
  Object.assign(content.style, {
   display: 'flex',
   flexDirection: 'column',
-  flexGrow: '1',
  })
 
  // Menu bar
@@ -147,9 +174,13 @@ export function kvdbBrowser(
     'Create Directory',
     async function (name) {
      await kvdbInstance.directory.create(
+      lastKnownPath,
       name
      )
-     loadDirectory()
+     loadDirectory([
+      ...lastKnownPath,
+      name,
+     ])
     }
    )
   }
@@ -162,11 +193,14 @@ export function kvdbBrowser(
     theme,
     'Create Page',
     async function (name) {
-     await kvdbInstance.page.create({
-      name,
-      content: '',
-      url: '',
-     })
+     await kvdbInstance.page.create(
+      lastKnownPath,
+      {
+       name,
+       content: '',
+       url: '',
+      }
+     )
      loadDirectory()
     }
    )
@@ -189,8 +223,25 @@ export function kvdbBrowser(
  // Helpers
 
  async function loadDirectory(
-  path?: string[]
+  path: string[] = [],
+  highlightItem?: {
+   type: 'page' | 'directory'
+   name: string
+  },
+  openHighlight?: 'top' | 'blank'
  ) {
+  if (path && highlightItem) {
+   switch (openHighlight) {
+    case 'top':
+     switch (highlightItem.type) {
+      case 'directory':
+       return loadDirectory([
+        ...path,
+        highlightItem.name,
+       ])
+     }
+   }
+  }
   if (!path) {
    path = lastKnownPath
   }
@@ -203,10 +254,22 @@ export function kvdbBrowser(
       await kvdbInstance.directory.list(
        path!
       )
+     directoriesList.setItemActions([
+      ['❤', lovedList.addItemToList],
+     ])
+
      directoriesList.setItems(
-      dirList.dirs,
+      dirList.dirs.map((name) => ({
+       name,
+       namespace,
+       path,
+       type: 'directory',
+      })),
       async function (dir) {
-       loadDirectory([...path!, dir])
+       loadDirectory([
+        ...path!,
+        dir.name,
+       ])
       }
      )
     },
@@ -216,8 +279,16 @@ export function kvdbBrowser(
        path!
       )
 
+     pagesList.setItemActions([
+      ['❤', lovedList.addItemToList],
+     ])
      pagesList.setItems(
-      pageList.pages,
+      pageList.pages.map((name) => ({
+       name,
+       namespace,
+       path,
+       type: 'page',
+      })),
       async function (page) {
        console.log(
         'should open page',
@@ -231,7 +302,14 @@ export function kvdbBrowser(
   )
   breadcrumbs.setPath(path)
  }
- container.append(sidebar, content)
+ contentContainer.appendChild(
+  contentScroll
+ )
+ contentScroll.appendChild(content)
+ container.append(
+  sidebar,
+  contentContainer
+ )
  function destroy() {
   container.remove()
   breadcrumbs.destroy()

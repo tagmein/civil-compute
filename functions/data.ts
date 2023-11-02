@@ -16,7 +16,9 @@ export const onRequestGet: PagesFunction<
  try {
   const params = new URL(request.url)
    .searchParams
-  const name = params.get('name')
+  const _name = params.get('name')
+  const path = _name.split('/')
+  const name = path.pop()
   const namespace = params.get(
    'namespace'
   )
@@ -26,7 +28,8 @@ export const onRequestGet: PagesFunction<
 
   const db = kvdb(
    env.CIVIL_DATA_KV,
-   namespace
+   namespace,
+   path
   )
 
   switch (operation) {
@@ -142,7 +145,9 @@ export const onRequestPost: PagesFunction<
  try {
   const params = new URL(request.url)
    .searchParams
-  const name = params.get('name')
+  const _name = params.get('name')
+  const path = _name.split('/')
+  const name = path.pop()
   const namespace = params.get(
    'namespace'
   )
@@ -212,7 +217,8 @@ export const onRequestPost: PagesFunction<
 
   const db = kvdb(
    env.CIVIL_DATA_KV,
-   namespace
+   namespace,
+   path
   )
 
   const body: Body =

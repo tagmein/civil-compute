@@ -47,7 +47,61 @@ export type KVDBResponse =
  | PageListResponse
  | SavedResponse
 
-export function kvdb(namespace = '') {
+export interface KVDBDirectoryTools {
+ namespace(
+  name: string
+ ): KVDBDirectoryTools
+ directory: {
+  create(
+   path: string[],
+   name: string
+  ): Promise<DirectoryReadResponse>
+  delete(
+   path: string[],
+   name: string
+  ): Promise<DeletedResponse>
+  read(
+   path: string[],
+   name: string
+  ): Promise<DirectoryReadResponse>
+  list(
+   path: string[]
+  ): Promise<DirectoryListResponse>
+  exists(
+   path: string[],
+   name: string
+  ): Promise<ExistsResponse>
+ }
+ page: {
+  create(
+   path: string[],
+   page: KVDBPage
+  ): Promise<PageReadResponse>
+  delete(
+   path: string[],
+   name: string
+  ): Promise<DeletedResponse>
+  read(
+   path: string[],
+   name: string
+  ): Promise<PageReadResponse>
+  save(
+   path: string[],
+   page: KVDBPage
+  ): Promise<SavedResponse>
+  list(
+   path: string[]
+  ): Promise<PageListResponse>
+  exists(
+   path: string[],
+   name: string
+  ): Promise<ExistsResponse>
+ }
+}
+
+export function kvdb(
+ namespace = ''
+): KVDBDirectoryTools {
  async function request(
   operation: string,
   name?: string,
@@ -89,27 +143,43 @@ export function kvdb(namespace = '') {
  }
 
  return {
+  namespace(name: string) {
+   return kvdb(
+    [namespace, name]
+     .filter((x) => x.length)
+     .join('/')
+   )
+  },
   directory: {
-   async create(name: string) {
+   async create(
+    path: string[],
+    name: string
+   ) {
     return request(
      'directory.create',
-     name,
+     [...path, name].join('/'),
      { name }
     ) as Promise<DirectoryReadResponse>
    },
 
-   async delete(name: string) {
+   async delete(
+    path: string[],
+    name: string
+   ) {
     return request(
      'directory.delete',
-     name,
+     [...path, name].join('/'),
      {}
     ) as Promise<DeletedResponse>
    },
 
-   async read(name: string) {
+   async read(
+    path: string[],
+    name: string
+   ) {
     return request(
      'directory.read',
-     name
+     [...path, name].join('/')
     ) as Promise<DirectoryReadResponse>
    },
 
@@ -120,35 +190,47 @@ export function kvdb(namespace = '') {
     ) as Promise<DirectoryListResponse>
    },
 
-   async exists(name: string) {
+   async exists(
+    path: string[],
+    name: string
+   ) {
     return request(
      'directory.exists',
-     name
+     [...path, name].join('/')
     ) as Promise<ExistsResponse>
    },
   },
 
   page: {
-   async create(page: KVDBPage) {
+   async create(
+    path: string[],
+    page: KVDBPage
+   ) {
     return request(
      'page.create',
-     page.name,
+     [...path, page.name].join('/'),
      page
     ) as Promise<PageReadResponse>
    },
 
-   async delete(name: string) {
+   async delete(
+    path: string[],
+    name: string
+   ) {
     return request(
      'page.delete',
-     name,
+     [...path, name].join('/'),
      {}
     ) as Promise<DeletedResponse>
    },
 
-   async read(name: string) {
+   async read(
+    path: string[],
+    name: string
+   ) {
     return request(
      'page.read',
-     name
+     [...path, name].join('/')
     ) as Promise<PageReadResponse>
    },
 
@@ -159,17 +241,23 @@ export function kvdb(namespace = '') {
     ) as Promise<PageListResponse>
    },
 
-   async exists(name: string) {
+   async exists(
+    path: string[],
+    name: string
+   ) {
     return request(
      'page.exists',
-     name
+     [...path, name].join('/')
     ) as Promise<ExistsResponse>
    },
 
-   async save(page: KVDBPage) {
+   async save(
+    path: string[],
+    page: KVDBPage
+   ) {
     return request(
      'page.save',
-     page.name,
+     [...path, page.name].join('/'),
      page
     ) as Promise<SavedResponse>
    },
