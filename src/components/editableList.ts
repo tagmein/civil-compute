@@ -132,22 +132,31 @@ export function editableList(
    await kvdbDir.page.list([listName])
 
   listComponent.setItems(
-   await Promise.all(
-    pageList.pages.map(
-     async (pageName) => {
-      const pageResponse =
-       await kvdbDir.page.read(
-        [listName],
-        pageName
-       )
-      const page: ListItem = JSON.parse(
-       pageResponse.page.content ?? '{}'
-      )
-      page.listPageName = pageName
-      return page
-     }
+   (
+    await Promise.all(
+     pageList.pages.map(
+      async (pageName) => {
+       const pageResponse =
+        await kvdbDir.page.read(
+         [listName],
+         pageName
+        )
+       if (!pageResponse.page) {
+        return undefined
+       }
+       const page: ListItem =
+        JSON.parse(
+         pageResponse.page.content ??
+          '{}'
+        )
+       page.listPageName = pageName
+       return page
+      }
+     )
     )
-   ),
+   ).filter(
+    (x) => typeof x !== 'undefined'
+   ) as ListItem[],
    async (item: ListItem) => {
     loadDirectory(
      item.path,
