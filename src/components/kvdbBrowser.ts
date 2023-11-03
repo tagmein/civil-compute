@@ -8,7 +8,10 @@ import { withTextContent } from '@starryui/traits'
 import { User } from '../lib/auth'
 import { kvdb } from '../lib/kvdb'
 import { breadcrumbNavigator } from './breadcrumbNavigator'
-import { editableList } from './editableList'
+import {
+ ListItem,
+ editableList,
+} from './editableList'
 import { list } from './list'
 import {
  Modal,
@@ -258,6 +261,22 @@ export function kvdbBrowser(
   },
   openHighlight?: 'top' | 'blank'
  ) {
+  function renderPage(page: ListItem) {
+   const editor =
+    document.createElement('div')
+   editor.classList.add('pageEditor')
+   async function load() {
+    const fullPage =
+     await kvdbInstance.page.read(
+      path,
+      page.name
+     )
+    editor.textContent =
+     fullPage.page.content ?? '(empty)'
+   }
+   load().catch((e) => console.error(e))
+   return editor
+  }
   if (path && highlightItem) {
    switch (openHighlight) {
     case 'top':
@@ -267,6 +286,19 @@ export function kvdbBrowser(
         ...path,
         highlightItem.name,
        ])
+      case 'page':
+       tabs.openTab(
+        `${namespace}#${path.join(
+         '/'
+        )}#${highlightItem.name}`,
+        () =>
+         renderPage({
+          path,
+          namespace,
+          ...highlightItem,
+         })
+       )
+       return
      }
    }
   }
@@ -285,7 +317,11 @@ export function kvdbBrowser(
        path!
       )
      directoriesList.setItemActions([
-      ['❤', lovedList.addItemToList],
+      [
+       '❤',
+       lovedList.addItemToList,
+       'Add to Loved',
+      ],
      ])
 
      directoriesList.setItems(
@@ -310,7 +346,11 @@ export function kvdbBrowser(
       )
 
      pagesList.setItemActions([
-      ['❤', lovedList.addItemToList],
+      [
+       '❤',
+       lovedList.addItemToList,
+       'Add to Loved',
+      ],
      ])
      pagesList.setItems(
       pageList.pages.map((name) => ({
@@ -326,27 +366,7 @@ export function kvdbBrowser(
         }#${page.path.join('/')}#${
          page.name
         }`,
-        () => {
-         const editor =
-          document.createElement('div')
-         editor.classList.add(
-          'pageEditor'
-         )
-         async function load() {
-          const fullPage =
-           await kvdbInstance.page.read(
-            page.path,
-            page.name
-           )
-          editor.textContent =
-           fullPage.page.content ??
-           '(empty)'
-         }
-         load().catch((e) =>
-          console.error(e)
-         )
-         return editor
-        }
+        () => renderPage(page)
        )
       }
      )

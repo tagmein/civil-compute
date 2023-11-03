@@ -12,7 +12,8 @@ import { ListItem } from './editableList'
 
 export type ItemAction = [
  string,
- (item: ListItem) => Promise<void>
+ (item: ListItem) => Promise<void>,
+ string
 ]
 
 export function list(
@@ -100,20 +101,27 @@ export function list(
    x.remove()
   )
   itemActionButtons = itemActions.map(
-   ([label, action]) =>
-    themedButton.add(
-     withTextContent(label),
-     withClick(function (event) {
-      event.stopPropagation()
-      if (
-       typeof currentItem ===
-       'undefined'
-      ) {
-       throw new Error('hmm')
-      }
-      action(currentItem)
-     })
-    )()
+   ([label, action, title]) => {
+    const actionButton =
+     themedButton.add(
+      withTextContent(label),
+      withClick(function (event) {
+       event.stopPropagation()
+       if (
+        typeof currentItem ===
+        'undefined'
+       ) {
+        throw new Error('hmm')
+       }
+       action(currentItem)
+      })
+     )()
+    actionButton.setAttribute(
+     'title',
+     title
+    )
+    return actionButton
+   }
   )
  }
 

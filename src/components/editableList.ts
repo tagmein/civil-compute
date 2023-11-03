@@ -1,6 +1,9 @@
 import { StarryUITheme } from '@starryui/theme'
 import { KVDBDirectoryTools } from '../lib/kvdb'
-import { list } from './list'
+import {
+ ItemAction,
+ list,
+} from './list'
 
 export interface ListItem {
  name: string
@@ -27,10 +30,7 @@ function createActionHandlers(
  removeItem: (
   itemPage: string
  ) => Promise<void>
-): [
- string,
- (item: ListItem) => Promise<void>
-][] {
+): ItemAction[] {
  return [
   [
    '✕',
@@ -39,12 +39,14 @@ function createActionHandlers(
      await removeItem(item.listPageName)
     }
    },
+   'Remove item from list',
   ],
   [
    '＋',
    async (item: ListItem) => {
     console.log('Add to list', item)
    },
+   '(coming soon) add item to another list',
   ],
   [
    '⎘',
@@ -58,6 +60,7 @@ function createActionHandlers(
      'blank'
     )
    },
+   'Locate item in Index',
   ],
  ]
 }
@@ -172,10 +175,7 @@ export function editableList(
  async function addItemToList(
   item: ListItem
  ) {
-  console.log('a')
   await waitForLoad()
-
-  console.log('b')
   const pageList =
    await kvdbDir.page.list([listName])
   const maxPageNum =
