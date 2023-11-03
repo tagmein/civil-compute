@@ -14,6 +14,7 @@ import {
  Modal,
  openModal,
 } from './openModal'
+import { tabSwitcher } from './tabSwitcher'
 
 export function kvdbBrowser(
  theme: StarryUITheme,
@@ -47,6 +48,11 @@ export function kvdbBrowser(
      },
     ]
    ),
+   attachStyle(theme, '.pageEditor', {
+    backgroundColor: 'var(--theme2)',
+    flexGrow: '1',
+    overflow: 'hidden',
+   }),
   ]
  const kvdbInstance = kvdb(namespace)
  const container =
@@ -59,7 +65,9 @@ export function kvdbBrowser(
  const sidebar =
   document.createElement('div')
  Object.assign(sidebar.style, {
-  backgroundColor: 'var(--theme2)',
+  backgroundColor: 'var(--theme1)',
+  borderRight:
+   '1px solid var(--theme4)',
   width: '240px',
  })
  const kvdbInstanceLists =
@@ -75,6 +83,7 @@ export function kvdbBrowser(
  const contentContainer =
   document.createElement('div')
  Object.assign(contentContainer.style, {
+  backgroundColor: 'var(--theme1)',
   flexGrow: '1',
   overflow: 'hidden',
   position: 'relative',
@@ -98,6 +107,7 @@ export function kvdbBrowser(
  Object.assign(content.style, {
   display: 'flex',
   flexDirection: 'column',
+  height: '100%',
  })
 
  // Menu bar
@@ -207,13 +217,31 @@ export function kvdbBrowser(
   }
  )
 
- content.append(
-  menu,
-  breadcrumbs.element,
-  directoriesHeader,
-  directoriesList.element,
-  pagesHeader,
-  pagesList.element
+ let indexTabContents: HTMLElement
+
+ function indexTab() {
+  if (!indexTabContents) {
+   indexTabContents =
+    document.createElement('div')
+   indexTabContents.append(
+    menu,
+    breadcrumbs.element,
+    directoriesHeader,
+    directoriesList.element,
+    pagesHeader,
+    pagesList.element
+   )
+  }
+  return indexTabContents
+ }
+
+ const tabs = tabSwitcher(theme)
+ content.append(tabs.element)
+ tabs.openTab(
+  'Index',
+  indexTab,
+  false,
+  true
  )
 
  // Load initial data
@@ -246,6 +274,8 @@ export function kvdbBrowser(
    path = lastKnownPath
   }
   lastKnownPath = path
+  // Switch to Index tab
+  tabs.openTab('Index')
   // Fetch directories and pages
   await Promise.all(
    [
@@ -290,10 +320,33 @@ export function kvdbBrowser(
        type: 'page',
       })),
       async function (page) {
-       console.log(
-        'should open page',
-        ...path!,
-        page
+       tabs.openTab(
+        `${
+         page.namespace
+        }#${page.path.join('/')}#${
+         page.name
+        }`,
+        () => {
+         const editor =
+          document.createElement('div')
+         editor.classList.add(
+          'pageEditor'
+         )
+         async function load() {
+          const fullPage =
+           await kvdbInstance.page.read(
+            page.path,
+            page.name
+           )
+          editor.textContent =
+           fullPage.page.content ??
+           '(empty)'
+         }
+         load().catch((e) =>
+          console.error(e)
+         )
+         return editor
+        }
        )
       }
      )
