@@ -137,8 +137,14 @@ export function editableList(
   listComponent.setItems(
    (
     await Promise.all(
-     pageList.pages.map(
-      async (pageName) => {
+     pageList.pages
+      .sort(function (a, b) {
+       return (
+        parseInt(a, 10) -
+        parseInt(b, 10)
+       )
+      })
+      .map(async (pageName) => {
        const pageResponse =
         await kvdbDir.page.read(
          [listName],
@@ -154,8 +160,7 @@ export function editableList(
         )
        page.listPageName = pageName
        return page
-      }
-     )
+      })
     )
    ).filter(
     (x) => typeof x !== 'undefined'
@@ -180,10 +185,12 @@ export function editableList(
    await kvdbDir.page.list([listName])
   const maxPageNum =
    pageList.pages.length > 0
-    ? parseInt(
-       pageList.pages[
-        pageList.pages.length - 1
-       ]
+    ? Math.max(
+       ...pageList.pages.map((page) =>
+        !isNaN(parseInt(page, 10))
+         ? parseInt(page, 10)
+         : -1
+       )
       )
     : -1
   if (isNaN(maxPageNum)) {
