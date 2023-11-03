@@ -109,7 +109,37 @@ export function tabSwitcher(
  let tabs: Tab[] = []
  let activeTab: Tab | undefined =
   undefined
+ // Add keyboard event listener to tab bar
+ tabBar.addEventListener(
+  'keydown',
+  (e) => {
+   if (
+    e.key === 'ArrowRight' ||
+    e.key === 'ArrowLeft'
+   ) {
+    e.preventDefault() // Prevent scroll
 
+    const currentIndex = tabs.findIndex(
+     (t) => t.name === activeTab?.name
+    )
+
+    let nextIndex: number
+    if (e.key === 'ArrowRight') {
+     nextIndex = currentIndex + 1
+     if (nextIndex >= tabs.length) {
+      nextIndex = 0
+     }
+    } else {
+     nextIndex = currentIndex - 1
+     if (nextIndex < 0) {
+      nextIndex = tabs.length - 1
+     }
+    }
+
+    switchToTab(tabs[nextIndex].name)
+   }
+  }
+ )
  element.append(tabBar)
 
  function createTab(
