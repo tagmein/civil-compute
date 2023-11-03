@@ -34,34 +34,54 @@ async function main() {
    ? portEnv
    : DEFAULT_PORT
 
- function diskPath(key) {
+ async function diskPath(
+  namespace,
+  key
+ ) {
+  const namespaceDirPath = join(
+   STORAGE_DIR,
+   encodeURIComponent(namespace)
+  )
+  await mkdir(namespaceDirPath, {
+   recursive: true,
+   // todo cache our knowledge that the directory
+   // exists for performance enhancement here
+  })
   return join(
    STORAGE_DIR,
+   encodeURIComponent(namespace),
    encodeURIComponent(key)
   )
  }
 
  const diskMap = /* undefined && */ {
   async delete(key) {
+   const namespace = key.split('#')[0]
    try {
-    await unlink(diskPath(key))
+    await unlink(
+     await diskPath(namespace, key)
+    )
     return true
    } catch (e) {
     return false
    }
   },
   async get(key) {
+   const namespace = key.split('#')[0]
    try {
     return (
-     await readFile(diskPath(key))
+     await readFile(
+      await diskPath(namespace, key)
+     )
     ).toString('utf8')
    } catch (e) {
     return null
    }
   },
   async set(key, value) {
+   const namespace = key.split('#')[0]
    await writeFile(
-    diskPath(key),
+    await diskPath(namespace, key),
     value,
     'utf8'
    )
