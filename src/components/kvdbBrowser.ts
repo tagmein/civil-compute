@@ -5,6 +5,7 @@ import {
 import { User } from '../lib/auth'
 import { kvdb } from '../lib/kvdb'
 import { editableList } from './editableList'
+import { kvdbBrowserSidebar } from './kvdbBrowserSidebar'
 import { kvdbDirectory } from './kvdbDirectory'
 import { ItemAction } from './list'
 import { tabSwitcher } from './tabSwitcher'
@@ -46,21 +47,11 @@ export function kvdbBrowser(
    }),
   ]
  const kvdbInstance = kvdb(namespace)
- const container =
+ const element =
   document.createElement('div')
- container.classList.add(
+ element.classList.add(
   'kvdbBrowser_container'
  )
-
- // Sidebar
- const sidebar =
-  document.createElement('div')
- Object.assign(sidebar.style, {
-  backgroundColor: 'var(--theme1)',
-  borderRight:
-   '1px solid var(--theme4)',
-  width: '240px',
- })
 
  // Content area
  const contentContainer =
@@ -119,14 +110,24 @@ export function kvdbBrowser(
   [loveItemAction]
  )
 
- sidebar.appendChild(lovedList.element)
+ const sidebar = kvdbBrowserSidebar(
+  theme,
+  kvdbInstance.enterNamespace(
+   '.civil-preferences'
+  )
+ )
+ sidebar.element.appendChild(
+  lovedList.element
+ )
 
  contentContainer.appendChild(
   contentScroll
  )
+
  contentScroll.appendChild(content)
- container.append(
-  sidebar,
+
+ element.append(
+  sidebar.element,
   contentContainer
  )
 
@@ -137,14 +138,16 @@ export function kvdbBrowser(
   false,
   true
  )
+
  directoryView.loadDirectory()
 
  function destroy() {
-  container.remove()
+  element.remove()
   directoryView.destroy()
+  sidebar.destroy()
   for (const sheet of stylesheets) {
    document.head.removeChild(sheet)
   }
  }
- return { destroy, element: container }
+ return { destroy, element }
 }
