@@ -13,7 +13,10 @@ import {
  ListView,
  list,
 } from './list'
-import { TabSwitcherView } from './tabSwitcher'
+import {
+ TabContents,
+ TabSwitcherView,
+} from './tabSwitcher'
 
 export interface KVDBDirectoryView {
  destroy(): void
@@ -27,7 +30,7 @@ export interface KVDBDirectoryView {
   openHighlight?: 'top' | 'blank'
  ): Promise<void>
  pagesList: ListView
- view(): HTMLElement
+ view(): TabContents
 }
 
 export function kvdbDirectory(
@@ -175,7 +178,7 @@ export function kvdbDirectory(
          highlightItem.name
         }`,
         () =>
-         kvdbPage(kvdbInstance, {
+         kvdbPage(theme, kvdbInstance, {
           path,
           namespace:
            kvdbInstance.namespace,
@@ -244,7 +247,11 @@ export function kvdbDirectory(
          page.name
         }`,
         () =>
-         kvdbPage(kvdbInstance, page)
+         kvdbPage(
+          theme,
+          kvdbInstance,
+          page
+         )
        )
       }
      )
@@ -269,7 +276,12 @@ export function kvdbDirectory(
     pagesList.element
    )
   }
-  return viewContent
+  return {
+   destroy() {
+    viewContent.remove()
+   },
+   element: viewContent,
+  }
  }
 
  function destroy() {

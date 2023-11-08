@@ -40,11 +40,6 @@ export function kvdbBrowser(
      },
     ]
    ),
-   attachStyle(theme, '.pageEditor', {
-    backgroundColor: 'var(--theme2)',
-    flexGrow: '1',
-    overflow: 'hidden',
-   }),
   ]
  const kvdbInstance = kvdb(namespace)
  const element =
@@ -53,7 +48,6 @@ export function kvdbBrowser(
   'kvdbBrowser_container'
  )
 
- // Content area
  const contentContainer =
   document.createElement('div')
  Object.assign(contentContainer.style, {
@@ -75,7 +69,6 @@ export function kvdbBrowser(
   bottom: '0',
  })
 
- // Content area
  const content =
   document.createElement('div')
  Object.assign(content.style, {

@@ -6,8 +6,13 @@ import {
 export interface Tab {
  name: string
  element: HTMLElement
- contents: () => HTMLElement
- cachedContents?: HTMLElement
+ contents: () => TabContents
+ cachedContents?: TabContents
+}
+
+export interface TabContents {
+ destroy(): void
+ element: HTMLElement
 }
 
 export interface TabSwitcherView {
@@ -15,7 +20,7 @@ export interface TabSwitcherView {
  element: HTMLElement
  openTab(
   name: string,
-  contents?: () => HTMLElement,
+  contents?: () => TabContents,
   closeable?: boolean,
   switchTo?: boolean
  ): void
@@ -210,9 +215,14 @@ export function tabSwitcher(
   }
 
   if (activeTab) {
-   activeTab.cachedContents?.remove?.()
    activeTab.element.dataset.active =
     'false'
+
+   if (activeTab.cachedContents) {
+    element.removeChild(
+     activeTab.cachedContents.element
+    )
+   }
   }
   activeTab = tab
 
@@ -220,7 +230,7 @@ export function tabSwitcher(
    tab.cachedContents = tab.contents()
   }
   element.appendChild(
-   tab.cachedContents
+   tab.cachedContents.element
   )
   activeTab.element.dataset.active =
    'true'
@@ -241,10 +251,10 @@ export function tabSwitcher(
    return
   }
 
-  // Remove tab element
   tabBar.children[index].remove()
-
-  // Remove tab object
+  tabs[
+   index
+  ].cachedContents?.destroy?.()
   tabs.splice(index, 1)
 
   // If closing active tab
@@ -265,7 +275,7 @@ export function tabSwitcher(
 
  function openTab(
   name: string,
-  contents?: () => HTMLElement,
+  contents?: () => TabContents,
   closeable = true,
   switchTo = true
  ) {
@@ -300,7 +310,6 @@ export function tabSwitcher(
 
  return {
   destroy() {
-   element.remove()
    for (const stylesheet of stylesheets) {
     document.head.removeChild(
      stylesheet
