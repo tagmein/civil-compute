@@ -48,7 +48,8 @@ export type KVDBResponse =
  | SavedResponse
 
 export interface KVDBDirectoryTools {
- namespace(
+ namespace: string
+ enterNamespace(
   name: string
  ): KVDBDirectoryTools
  directory: {
@@ -143,7 +144,8 @@ export function kvdb(
  }
 
  return {
-  namespace(name: string) {
+  namespace,
+  enterNamespace(name: string) {
    return kvdb(
     [namespace, name]
      .filter((x) => x.length)

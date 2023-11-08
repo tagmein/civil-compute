@@ -22,7 +22,7 @@ Then, visit http://localhost:8788/ in a web browser
 In terminal 2, run the mock kv server, which is needed for local development:
 
 ```
-node mock-kv.mjs
+npm run kv
 ```
 
 You should see a message like the following:

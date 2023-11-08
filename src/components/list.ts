@@ -16,9 +16,23 @@ export type ItemAction = [
  string
 ]
 
+export interface ListView {
+ destroy(): void
+ element: HTMLElement
+ setItemActions(
+  itemActions: ItemAction[]
+ ): void
+ setItems(
+  items: ListItem[],
+  onClick: (
+   item: ListItem
+  ) => Promise<void>
+ ): void
+}
+
 export function list(
  theme: StarryUITheme
-) {
+): ListView {
  const themedButton = applyTheme(
   theme,
   button

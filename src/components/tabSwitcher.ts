@@ -3,16 +3,28 @@ import {
  attachStyle,
 } from '@starryui/theme'
 
-interface Tab {
+export interface Tab {
  name: string
  element: HTMLElement
  contents: () => HTMLElement
  cachedContents?: HTMLElement
 }
 
+export interface TabSwitcherView {
+ destroy(): void
+ element: HTMLElement
+ openTab(
+  name: string,
+  contents?: () => HTMLElement,
+  closeable?: boolean,
+  switchTo?: boolean
+ ): void
+ closeTab(name: string): void
+}
+
 export function tabSwitcher(
  theme: StarryUITheme
-) {
+): TabSwitcherView {
  const element =
   document.createElement('div')
  element.classList.add(
