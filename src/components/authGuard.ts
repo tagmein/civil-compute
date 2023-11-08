@@ -220,6 +220,7 @@ export function authGuard(
    style: {
     backgroundColor: 'var(--theme2)',
     color: 'var(--theme8)',
+    lineHeight: '20px',
    },
   })
 
@@ -245,8 +246,9 @@ export function authGuard(
   )({
    style: {
     backgroundColor: 'transparent',
+    borderBottom: 'none',
     color: 'var(--theme8)',
-    lineHeight: '1.5',
+    lineHeight: '22px',
     height: '100%',
     padding:
      'var(--dimension2) var(--dimension3)',

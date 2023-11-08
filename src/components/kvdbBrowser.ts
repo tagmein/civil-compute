@@ -1,5 +1,7 @@
+import { button } from '@starryui/button'
 import {
  StarryUITheme,
+ applyThemeMultiple,
  attachStyle,
 } from '@starryui/theme'
 import { User } from '../lib/auth'
@@ -47,6 +49,22 @@ export function kvdbBrowser(
  element.classList.add(
   'kvdbBrowser_container'
  )
+
+ const [themedButton] =
+  applyThemeMultiple(theme, [button])
+
+ // Menu bar
+ const menu =
+  document.createElement('div')
+ Object.assign(menu.style, {
+  borderBottom:
+   '1px solid var(--theme4)',
+  display: 'flex',
+  alignItems: 'flex-start',
+  height: '38px',
+  overflowX: 'auto',
+  overflowY: 'hidden',
+ })
 
  const contentContainer =
   document.createElement('div')
@@ -113,7 +131,9 @@ export function kvdbBrowser(
   lovedList.element
  )
 
- contentContainer.appendChild(
+ contentContainer.append(
+  menu,
+  tabs.element,
   contentScroll
  )
 
@@ -124,7 +144,6 @@ export function kvdbBrowser(
   contentContainer
  )
 
- content.append(tabs.element)
  tabs.openTab(
   'Index',
   directoryView.view,
