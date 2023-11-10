@@ -56,7 +56,11 @@ export function kvdbBrowser(
  })
 
  const toggleSidebarButton = themedButton.add(
-  withClick(async function () {}),
+  withClick(async function () {
+   await sidebar.setVisible(
+    !(await sidebar.getVisible())
+   )
+  }),
   withTextContent('𝍢')
  )({
   style: {
@@ -72,7 +76,10 @@ export function kvdbBrowser(
    maxHeight: 'initial',
   },
  })
-
+ toggleSidebarButton.setAttribute(
+  'title',
+  'Toggle sidebar'
+ )
  menu.appendChild(toggleSidebarButton)
 
  const contentContainer =
