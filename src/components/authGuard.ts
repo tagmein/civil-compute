@@ -29,70 +29,69 @@ function createAuthForm(
  theme: StarryUITheme,
  onUpdate: () => void
 ): AuthElement {
- let action:
-  | 'sign-in'
-  | 'create-account' = 'sign-in'
+ let action: 'sign-in' | 'create-account' =
+  'sign-in'
 
  const [themedButton, themedRow] =
-  applyThemeMultiple(theme, [
-   button,
-   row,
-  ])
+  applyThemeMultiple(theme, [button, row])
 
- const form =
-  document.createElement('form')
+ const form = document.createElement('form')
 
- form.setAttribute('tabindex', '0')
+ async function submitAuthForm() {
+  errorMessage.textContent = ''
+  form.focus()
 
- form.addEventListener(
-  'submit',
-  async function (event) {
-   errorMessage.textContent = ''
-   event.preventDefault()
-   form.focus()
+  for (const child of [
+   form,
+   ...form.children,
+  ]) {
+   child?.setAttribute?.('disabled', 'disabled')
+  }
 
+  const username = usernameInput.value
+  const password = passwordInput.value
+  const createAccount =
+   action === 'create-account'
+
+  try {
+   const response = await createAuth(
+    username,
+    password,
+    createAccount
+   )
+
+   if ('error' in response) {
+    errorMessage.textContent = response.error
+    return
+   }
+
+   onUpdate()
+  } catch (error) {
+   errorMessage.textContent = error.message
+  } finally {
    for (const child of [
     form,
     ...form.children,
    ]) {
-    child?.setAttribute?.(
-     'disabled',
-     'disabled'
-    )
+    child?.removeAttribute?.('disabled')
    }
+  }
+ }
 
-   const username = usernameInput.value
-   const password = passwordInput.value
-   const createAccount =
-    action === 'create-account'
-
-   try {
-    const response = await createAuth(
-     username,
-     password,
-     createAccount
-    )
-
-    if ('error' in response) {
-     errorMessage.textContent =
-      response.error
-     return
-    }
-
-    onUpdate()
-   } catch (error) {
-    errorMessage.textContent =
-     error.message
-   } finally {
-    for (const child of [
-     form,
-     ...form.children,
-    ]) {
-     child?.removeAttribute?.(
-      'disabled'
-     )
-    }
+ form.setAttribute('tabindex', '0')
+ form.addEventListener(
+  'keydown',
+  async ({ key }) => {
+   if (key === 'Enter') {
+    await submitAuthForm()
    }
+  }
+ )
+ form.addEventListener(
+  'submit',
+  async function (event) {
+   event.preventDefault()
+   await submitAuthForm()
   }
  )
 
@@ -106,14 +105,10 @@ function createAuthForm(
   padding: 'var(--dimension4)',
  })
 
- const formTitle =
-  document.createElement('h3')
- formTitle.textContent =
-  'Sign in to continue'
+ const formTitle = document.createElement('h3')
+ formTitle.textContent = 'Sign in to continue'
 
- function inputStyle(
-  elem: HTMLElement
- ) {
+ function inputStyle(elem: HTMLElement) {
   Object.assign(elem.style, {
    backgroundColor: 'var(--theme1)',
    border: '1px solid var(--theme4)',
@@ -163,13 +158,12 @@ function createAuthForm(
   withTextContent('Sign in')
  )()
 
- const createAccountButton =
-  themedButton.add(
-   withClick(function () {
-    action = 'create-account'
-   }),
-   withTextContent('Create account')
-  )()
+ const createAccountButton = themedButton.add(
+  withClick(function () {
+   action = 'create-account'
+  }),
+  withTextContent('Create account')
+ )()
 
  buttonRow.append(
   signInButton,
@@ -203,18 +197,13 @@ function createAuthForm(
 export function authGuard(
  container: HTMLElement,
  theme: StarryUITheme,
- onAuthenticated: (
-  user: User
- ) => AuthElement
+ onAuthenticated: (user: User) => AuthElement
 ) {
  let currentElement: AuthElement
 
  function createAccountTray() {
   const [themedButton, themedTray] =
-   applyThemeMultiple(theme, [
-    button,
-    tray,
-   ])
+   applyThemeMultiple(theme, [button, tray])
 
   const accountTray = themedTray({
    style: {
@@ -224,8 +213,7 @@ export function authGuard(
    },
   })
 
-  const message =
-   document.createElement('span')
+  const message = document.createElement('span')
 
   Object.assign(message.style, {
    fontSize: '14px',
@@ -271,8 +259,7 @@ export function authGuard(
   }
  }
 
- const accountBanner =
-  createAccountTray()
+ const accountBanner = createAccountTray()
 
  async function render() {
   if (currentElement) {
@@ -282,35 +269,24 @@ export function authGuard(
   const auth = await getAuth()
 
   if (auth) {
-   currentElement = onAuthenticated(
-    auth.user
-   )
+   currentElement = onAuthenticated(auth.user)
    accountBanner.setMessage(
     `Welcome, ${auth.user.username}`
    )
    container.appendChild(
     accountBanner.container
    )
-   container.appendChild(
-    currentElement.element
-   )
+   container.appendChild(currentElement.element)
   } else {
-   if (
-    accountBanner.container
-     .parentElement
-   ) {
+   if (accountBanner.container.parentElement) {
     accountBanner.container.remove()
-    accountBanner.setMessage(
-     'signed out'
-    )
+    accountBanner.setMessage('signed out')
    }
    currentElement = createAuthForm(
     theme,
     render
    )
-   container.appendChild(
-    currentElement.element
-   )
+   container.appendChild(currentElement.element)
   }
  }
 

@@ -4,6 +4,11 @@ import {
  applyThemeMultiple,
  attachStyle,
 } from '@starryui/theme'
+import {
+ withClick,
+ withTextContent,
+} from '@starryui/traits'
+import { tray } from '@starryui/tray'
 import { User } from '../lib/auth'
 import { kvdb } from '../lib/kvdb'
 import { editableList } from './editableList'
@@ -17,59 +22,73 @@ export function kvdbBrowser(
  user: User,
  namespace = ''
 ) {
- const stylesheets: HTMLStyleElement[] =
-  [
-   attachStyle(
-    theme,
-    '.kvdbBrowser_container',
-    {
-     display: 'flex',
-     flexDirection: 'row',
-     flexGrow: '1',
-    }
-   ),
-   attachStyle(
-    theme,
-    '.primary-action',
-    [
-     {
-      '': {
-       backgroundColor: '#306060',
-      },
-      '&:hover': {
-       backgroundColor: '#50a0a0',
-      },
-     },
-    ]
-   ),
-  ]
+ const stylesheets: HTMLStyleElement[] = [
+  attachStyle(theme, '.kvdbBrowser_container', {
+   display: 'flex',
+   flexDirection: 'row',
+   flexGrow: '1',
+  }),
+  attachStyle(theme, '.primary-action', [
+   {
+    '': {
+     backgroundColor: '#306060',
+    },
+    '&:hover': {
+     backgroundColor: '#50a0a0',
+    },
+   },
+  ]),
+ ]
  const kvdbInstance = kvdb(namespace)
- const element =
-  document.createElement('div')
- element.classList.add(
-  'kvdbBrowser_container'
- )
+ const element = document.createElement('div')
+ element.classList.add('kvdbBrowser_container')
 
- const [themedButton] =
-  applyThemeMultiple(theme, [button])
+ const [themedButton, themedTray] =
+  applyThemeMultiple(theme, [button, tray])
 
  // Menu bar
- const menu =
-  document.createElement('div')
- Object.assign(menu.style, {
-  borderBottom:
-   '1px solid var(--theme4)',
-  display: 'flex',
-  alignItems: 'flex-start',
-  height: '38px',
-  overflowX: 'auto',
-  overflowY: 'hidden',
+ const menu = themedTray({
+  style: {
+   backgroundColor: 'var(--theme2)',
+   color: 'var(--theme8)',
+   lineHeight: '20px',
+  },
  })
+
+ const toggleSidebarButton = themedButton.add(
+  withClick(async function () {}),
+  withTextContent('𝍢')
+ )({
+  style: {
+   backgroundColor: 'transparent',
+   borderBottom: 'none',
+   borderRight: '1px solid var(--theme4)',
+   color: 'var(--theme8)',
+   lineHeight: '22px',
+   height: '100%',
+   padding:
+    'var(--dimension2) var(--dimension3)',
+   boxSizing: 'border-box',
+   maxHeight: 'initial',
+  },
+ })
+
+ menu.appendChild(toggleSidebarButton)
 
  const contentContainer =
   document.createElement('div')
  Object.assign(contentContainer.style, {
   backgroundColor: 'var(--theme1)',
+  display: 'flex',
+  flexDirection: 'column',
+  flexGrow: '1',
+  overflow: 'hidden',
+  position: 'relative',
+ })
+
+ const contentFill =
+  document.createElement('div')
+ Object.assign(contentFill.style, {
   flexGrow: '1',
   overflow: 'hidden',
   position: 'relative',
@@ -87,15 +106,7 @@ export function kvdbBrowser(
   bottom: '0',
  })
 
- const content =
-  document.createElement('div')
- Object.assign(content.style, {
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
- })
-
- const tabs = tabSwitcher(theme)
+ const tabs = tabSwitcher(theme, contentScroll)
 
  const kvdbInstanceLists =
   kvdbInstance.enterNamespace('.lists')
@@ -127,17 +138,15 @@ export function kvdbBrowser(
    '.civil-preferences'
   )
  )
- sidebar.element.appendChild(
-  lovedList.element
- )
+ sidebar.element.appendChild(lovedList.element)
+
+ contentFill.appendChild(contentScroll)
 
  contentContainer.append(
   menu,
   tabs.element,
-  contentScroll
+  contentFill
  )
-
- contentScroll.appendChild(content)
 
  element.append(
   sidebar.element,

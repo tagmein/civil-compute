@@ -28,29 +28,15 @@ export interface TabSwitcherView {
 }
 
 export function tabSwitcher(
- theme: StarryUITheme
+ theme: StarryUITheme,
+ tabContentHostElement: HTMLElement
 ): TabSwitcherView {
  const element =
   document.createElement('div')
  element.classList.add(
-  'tabSwitcher_container'
- )
-
- const tabBar =
-  document.createElement('div')
- tabBar.classList.add(
   'tabSwitcher_tabBar'
  )
  const stylesheets = [
-  attachStyle(
-   theme,
-   '.tabSwitcher_container',
-   {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-   }
-  ),
   attachStyle(
    theme,
    '.tabSwitcher_tabBar',
@@ -127,7 +113,7 @@ export function tabSwitcher(
  let activeTab: Tab | undefined =
   undefined
  // Add keyboard event listener to tab bar
- tabBar.addEventListener(
+ element.addEventListener(
   'keydown',
   (e) => {
    if (
@@ -157,7 +143,6 @@ export function tabSwitcher(
    }
   }
  )
- element.append(tabBar)
 
  function createTab(
   name: string,
@@ -192,6 +177,15 @@ export function tabSwitcher(
     }
    )
 
+   tab.addEventListener(
+    'keydown',
+    function ({ key }) {
+     if (key === 'Escape') {
+      closeTab(name)
+     }
+    }
+   )
+
    tab.appendChild(closeBtn)
   }
 
@@ -219,7 +213,7 @@ export function tabSwitcher(
     'false'
 
    if (activeTab.cachedContents) {
-    element.removeChild(
+    tabContentHostElement.removeChild(
      activeTab.cachedContents.element
     )
    }
@@ -229,7 +223,7 @@ export function tabSwitcher(
   if (!tab.cachedContents) {
    tab.cachedContents = tab.contents()
   }
-  element.appendChild(
+  tabContentHostElement.appendChild(
    tab.cachedContents.element
   )
   activeTab.element.dataset.active =
@@ -251,7 +245,7 @@ export function tabSwitcher(
    return
   }
 
-  tabBar.children[index].remove()
+  element.children[index].remove()
   tabs[
    index
   ].cachedContents?.destroy?.()
@@ -295,7 +289,7 @@ export function tabSwitcher(
     name,
     closeable
    )
-   tabBar.appendChild(tab)
+   element.appendChild(tab)
    tabs.push({
     name,
     contents,

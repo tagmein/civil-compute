@@ -55,22 +55,10 @@ export function mainTray(
  route: () => void,
  theme: StarryUITheme
 ): MainTrayControl {
- const themedButton = applyTheme(
-  theme,
-  button
- )
- const themedMenu = applyTheme(
-  theme,
-  menu
- )
- const themedRow = applyTheme(
-  theme,
-  row
- )
- const themedTray = applyTheme(
-  theme,
-  tray
- )
+ const themedButton = applyTheme(theme, button)
+ const themedMenu = applyTheme(theme, menu)
+ const themedRow = applyTheme(theme, row)
+ const themedTray = applyTheme(theme, tray)
 
  const container = themedTray({
   style: {
@@ -96,14 +84,10 @@ export function mainTray(
  )
 
  const themeNameStorageKey = 'theme'
- const storedThemeName =
-  localStorage.getItem(
-   themeNameStorageKey
-  )
- let allThemes = [
-  themeMidnight,
-  themeSandstone,
- ]
+ const storedThemeName = localStorage.getItem(
+  themeNameStorageKey
+ )
+ let allThemes = [themeMidnight, themeSandstone]
  let activeTheme =
   allThemes.find(
    (x) => x.name === storedThemeName
@@ -117,18 +101,15 @@ export function mainTray(
   themeMidnight,
   'button'
  )
- themeSwitcher.textContent =
-  activeTheme.name
+ themeSwitcher.textContent = activeTheme.name
  attachMenu(
   themeSwitcher,
   themedMenu.add({
    type: 'onSelect',
    onSelect(selectedThemeName) {
-    const selectedTheme =
-     allThemes.find(
-      (x) =>
-       x.name === selectedThemeName
-     )
+    const selectedTheme = allThemes.find(
+     (x) => x.name === selectedThemeName
+    )
     if (selectedTheme) {
      activeTheme = selectedTheme
      themeSwitcher.textContent =
@@ -159,17 +140,15 @@ export function mainTray(
  container.appendChild(themeSwitcher)
  container.appendChild(
   themedButton.add(
-   withClick(
-    function toggleFullscreen() {
-     if (!document.fullscreenElement) {
-      document.body.requestFullscreen()
-     } else {
-      if (document.exitFullscreen) {
-       document.exitFullscreen()
-      }
+   withClick(function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+     document.body.requestFullscreen()
+    } else {
+     if (document.exitFullscreen) {
+      document.exitFullscreen()
      }
     }
-   ),
+   }),
    withTextContent('⛶')
   )()
  )
@@ -184,43 +163,33 @@ export function mainTray(
  ): StarryUIPage {
   for (const prefixBreadcrumb of prefixBreadcrumbs) {
    const crumb = themedButton.add(
-    withTextContent(
-     prefixBreadcrumb.title
-    )
+    withTextContent(prefixBreadcrumb.title)
    )({
     href: prefixBreadcrumb.url,
     tagName: 'a',
    })
-   page.startUpTasks.initial.push(
-    function () {
-     crumb.setAttribute(
-      'data-starryui-reveal',
-      'hidden'
-     )
-     breadcrumbs.appendChild(crumb)
-    }
-   )
-   page.startUpTasks.final.push(
-    function () {
-     crumb.setAttribute(
-      'data-starryui-reveal',
-      'reveal'
-     )
-    }
-   )
-   page.cleanUpTasks.initial.push(
-    function () {
-     crumb.setAttribute(
-      'data-starryui-reveal',
-      'hidden'
-     )
-    }
-   )
-   page.cleanUpTasks.final.push(
-    function () {
-     breadcrumbs.removeChild(crumb)
-    }
-   )
+   page.startUpTasks.initial.push(function () {
+    crumb.setAttribute(
+     'data-starryui-reveal',
+     'hidden'
+    )
+    breadcrumbs.appendChild(crumb)
+   })
+   page.startUpTasks.final.push(function () {
+    crumb.setAttribute(
+     'data-starryui-reveal',
+     'reveal'
+    )
+   })
+   page.cleanUpTasks.initial.push(function () {
+    crumb.setAttribute(
+     'data-starryui-reveal',
+     'hidden'
+    )
+   })
+   page.cleanUpTasks.final.push(function () {
+    breadcrumbs.removeChild(crumb)
+   })
   }
   const crumb = themedButton.add(
    withTextContent(page.title)
@@ -228,36 +197,28 @@ export function mainTray(
    href: path,
    tagName: 'a',
   })
-  page.startUpTasks.initial.push(
-   function () {
-    crumb.setAttribute(
-     'data-starryui-reveal',
-     'hidden'
-    )
-    breadcrumbs.appendChild(crumb)
-   }
-  )
-  page.startUpTasks.final.push(
-   function () {
-    crumb.setAttribute(
-     'data-starryui-reveal',
-     'reveal'
-    )
-   }
-  )
-  page.cleanUpTasks.initial.push(
-   function () {
-    crumb.setAttribute(
-     'data-starryui-reveal',
-     'hidden'
-    )
-   }
-  )
-  page.cleanUpTasks.final.push(
-   function () {
-    breadcrumbs.removeChild(crumb)
-   }
-  )
+  page.startUpTasks.initial.push(function () {
+   crumb.setAttribute(
+    'data-starryui-reveal',
+    'hidden'
+   )
+   breadcrumbs.appendChild(crumb)
+  })
+  page.startUpTasks.final.push(function () {
+   crumb.setAttribute(
+    'data-starryui-reveal',
+    'reveal'
+   )
+  })
+  page.cleanUpTasks.initial.push(function () {
+   crumb.setAttribute(
+    'data-starryui-reveal',
+    'hidden'
+   )
+  })
+  page.cleanUpTasks.final.push(function () {
+   breadcrumbs.removeChild(crumb)
+  })
   return page
  }
 
