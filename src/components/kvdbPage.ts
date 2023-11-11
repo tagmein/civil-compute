@@ -2,6 +2,7 @@ import {
  StarryUITheme,
  attachStyle,
 } from '@starryui/theme'
+import { civil_program } from '../lib/civil'
 import { KVDBDirectoryTools } from '../lib/kvdb'
 import { ListItem } from './editableList'
 import { TabContents } from './tabSwitcher'
@@ -15,31 +16,69 @@ export function kvdbPage(
  page: ListItem
 ): KVDBPageView {
  const stylesheets = [
-  attachStyle(
-   theme,
-   '.kvdbPage_container',
+  attachStyle(theme, '.kvdbPage_container', [
    {
-    backgroundColor: 'var(--theme2)',
-    flexGrow: '1',
-    overflow: 'hidden',
-   }
-  ),
+    '': {
+     backgroundColor: 'var(--theme2)',
+     display: 'flex',
+     flexDirection: 'column',
+     flexGrow: '1',
+     height: '100%',
+     overflow: 'hidden',
+    },
+    '& > textarea': {
+     backgroundColor: 'var(--theme3)',
+     border: 'none',
+     borderBottom: '1px solid var(--theme4)',
+     boxSizing: 'border-box',
+     flexGrow: '1',
+     flexShrink: '0',
+     height: '50%',
+     maxHeight: '240px',
+     padding: 'var(--dimension2)',
+     resize: 'none',
+    },
+    '& > article': {
+     backgroundColor: 'var(--theme0)',
+     flexGrow: '1',
+    },
+   },
+  ]),
  ]
- const element =
-  document.createElement('div')
- element.classList.add(
-  'kvdbPage_container'
- )
+ const element = document.createElement('div')
+ element.classList.add('kvdbPage_container')
+ const source_code =
+  document.createElement('textarea')
+ const preview_area =
+  document.createElement('article')
+ element.append(source_code)
+ element.append(preview_area)
  async function load() {
-  const fullPage =
-   await kvdbInstance.page.read(
-    page.path,
-    page.name
-   )
-  element.textContent =
-   fullPage.page.content ?? '(empty)'
+  const fullPage = await kvdbInstance.page.read(
+   page.path,
+   page.name
+  )
+  source_code.value =
+   fullPage.page.content ?? ''
+  await preview()
  }
  load().catch((e) => console.error(e))
+ async function preview() {
+  const code = `
+   args hello world
+   get console log , call
+  `
+  const runtime = civil_program()
+  runtime.args('hello', 'world')
+  runtime.get('console', 'log')
+  runtime.call()
+  console.log(
+   'final types',
+   runtime.program.verify()
+  )
+  runtime.program.run(globalThis)
+ }
+ source_code.addEventListener('keyup', preview)
  function destroy() {
   for (const sheet of stylesheets) {
    document.head.removeChild(sheet)
