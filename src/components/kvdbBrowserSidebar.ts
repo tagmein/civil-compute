@@ -76,7 +76,7 @@ export function kvdbBrowserSidebar(
 
    element.classList.add('visible')
   } else {
-   await preferences.page.save([], {
+   await preferences.page.create([], {
     name:
      CivilPreferenceNames.ProjectSidebar
       .Visible,
