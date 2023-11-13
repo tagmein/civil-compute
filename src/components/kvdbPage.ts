@@ -45,14 +45,25 @@ export function kvdbPage(
    },
   ]),
  ]
+
+ // Menu bar
+ const menu = document.createElement('div')
+ Object.assign(menu.style, {
+  borderBottom: '1px solid var(--theme4)',
+  display: 'flex',
+  alignItems: 'flex-start',
+  height: '38px',
+  overflowX: 'auto',
+  overflowY: 'hidden',
+ })
+
  const element = document.createElement('div')
  element.classList.add('kvdbPage_container')
  const source_code =
   document.createElement('textarea')
  const preview_area =
   document.createElement('article')
- element.append(source_code)
- element.append(preview_area)
+ element.append(menu, source_code, preview_area)
  async function load() {
   const fullPage = await kvdbInstance.page.read(
    page.path,

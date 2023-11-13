@@ -40,45 +40,41 @@ export function kvdbDirectory(
  directoryActions: ItemAction[],
  pageActions: ItemAction[]
 ): KVDBDirectoryView {
- const [themedButton] =
-  applyThemeMultiple(theme, [button])
+ const [themedButton] = applyThemeMultiple(
+  theme,
+  [button]
+ )
 
  // Menu bar
- const menu =
-  document.createElement('div')
+ const menu = document.createElement('div')
  Object.assign(menu.style, {
-  borderBottom:
-   '1px solid var(--theme4)',
+  borderBottom: '1px solid var(--theme4)',
   display: 'flex',
   alignItems: 'flex-start',
   height: '38px',
   overflowX: 'auto',
   overflowY: 'hidden',
  })
+
  // Breadcrumbs
- const breadcrumbs =
-  breadcrumbNavigator(
-   theme,
-   kvdbInstance.namespace,
-   loadDirectory
-  )
+ const breadcrumbs = breadcrumbNavigator(
+  theme,
+  kvdbInstance.namespace,
+  loadDirectory
+ )
 
  // Directories
  const directoriesList = list(theme)
  const directoriesHeader =
   document.createElement('h3')
- directoriesHeader.textContent =
-  'Directories'
- Object.assign(
-  directoriesHeader.style,
-  {
-   display: 'flex',
-   flexDirection: 'row',
-   justifyContent: 'space-between',
-   padding: '0 var(--dimension3)',
-   marginBottom: '0',
-  }
- )
+ directoriesHeader.textContent = 'Directories'
+ Object.assign(directoriesHeader.style, {
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  padding: '0 var(--dimension3)',
+  marginBottom: '0',
+ })
  // Pages
  const pagesList = list(theme)
  const pagesHeader =
@@ -92,20 +88,15 @@ export function kvdbDirectory(
   marginBottom: '0',
  })
 
- const createDirButton =
-  themedButton.add(
-   withTextContent('Create Directory')
-  )({})
- directoriesHeader.append(
-  createDirButton
- )
+ const createDirButton = themedButton.add(
+  withTextContent('Create Directory')
+ )({})
+ directoriesHeader.append(createDirButton)
 
- const createPageButton =
-  themedButton.add(
-   withTextContent('Create Page')
-  )()
- createPageButton.textContent =
-  'Create Page'
+ const createPageButton = themedButton.add(
+  withTextContent('Create Page')
+ )()
+ createPageButton.textContent = 'Create Page'
  pagesHeader.append(createPageButton)
 
  createDirButton.addEventListener(
@@ -119,10 +110,7 @@ export function kvdbDirectory(
       lastKnownPath,
       name
      )
-     loadDirectory([
-      ...lastKnownPath,
-      name,
-     ])
+     loadDirectory([...lastKnownPath, name])
     }
    )
   }
@@ -172,16 +160,13 @@ export function kvdbDirectory(
        ])
       case 'page':
        tabs.openTab(
-        `${
-         kvdbInstance.namespace
-        }#${path.join('/')}#${
-         highlightItem.name
-        }`,
+        `${kvdbInstance.namespace}#${path.join(
+         '/'
+        )}#${highlightItem.name}`,
         () =>
          kvdbPage(theme, kvdbInstance, {
           path,
-          namespace:
-           kvdbInstance.namespace,
+          namespace: kvdbInstance.namespace,
           ...highlightItem,
          })
        )
@@ -200,58 +185,41 @@ export function kvdbDirectory(
    [
     async function () {
      const dirList =
-      await kvdbInstance.directory.list(
-       path!
-      )
+      await kvdbInstance.directory.list(path!)
      directoriesList.setItemActions(
       directoryActions
      )
      directoriesList.setItems(
       dirList.dirs.map((name) => ({
        name,
-       namespace:
-        kvdbInstance.namespace,
+       namespace: kvdbInstance.namespace,
        path,
        type: 'directory',
       })),
       async function (dir) {
-       loadDirectory([
-        ...path!,
-        dir.name,
-       ])
+       loadDirectory([...path!, dir.name])
       }
      )
     },
     async function () {
      const pageList =
-      await kvdbInstance.page.list(
-       path!
-      )
+      await kvdbInstance.page.list(path!)
 
-     pagesList.setItemActions(
-      pageActions
-     )
+     pagesList.setItemActions(pageActions)
      pagesList.setItems(
       pageList.pages.map((name) => ({
        name,
-       namespace:
-        kvdbInstance.namespace,
+       namespace: kvdbInstance.namespace,
        path,
        type: 'page',
       })),
       async function (page) {
        tabs.openTab(
-        `${
-         page.namespace
-        }#${page.path.join('/')}#${
-         page.name
-        }`,
+        `${page.namespace}#${page.path.join(
+         '/'
+        )}#${page.name}`,
         () =>
-         kvdbPage(
-          theme,
-          kvdbInstance,
-          page
-         )
+         kvdbPage(theme, kvdbInstance, page)
        )
       }
      )
@@ -265,11 +233,10 @@ export function kvdbDirectory(
 
  function view() {
   if (!viewContent) {
-   viewContent =
-    document.createElement('div')
+   viewContent = document.createElement('div')
    viewContent.append(
-    menu,
     breadcrumbs.element,
+    menu,
     directoriesHeader,
     directoriesList.element,
     pagesHeader,
