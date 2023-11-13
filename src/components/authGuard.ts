@@ -201,7 +201,14 @@ export function authGuard(
 ) {
  let currentElement: AuthElement
 
- function createAccountTray() {
+ interface AccountTray {
+  container: HTMLElement
+  destroy(): void
+  setExpiresAt(expires_at: number): void
+  setMessage(message: string): void
+ }
+
+ function createAccountTray(): AccountTray {
   const [themedButton, themedTray] =
    applyThemeMultiple(theme, [button, tray])
 
@@ -221,20 +228,89 @@ export function authGuard(
     'var(--dimension2) var(--dimension3)',
   })
 
+  const countdown =
+   document.createElement('span')
+
+  countdown.setAttribute(
+   'title',
+   'Shows the remaining session time'
+  )
+
+  Object.assign(countdown.style, {
+   fontSize: '14px',
+   padding:
+    'var(--dimension2) var(--dimension3)',
+  })
+
+  let countdownTimeout: NodeJS.Timeout
+
+  const TIME_ONE_SECOND = 1e3
+  const TIME_ONE_MINUTE = 6e4
+  const TIME_ONE_HOUR = 36e5
+  const TIME_ONE_DAY = 864e5
+
+  function setExpiresAt(expires_at: number) {
+   clearTimeout(countdownTimeout)
+   const timeRemaining = expires_at - Date.now()
+   function tick(
+    timeText: string,
+    delay: number
+   ) {
+    countdown.textContent = timeText
+    countdownTimeout = setTimeout(function () {
+     setExpiresAt(expires_at)
+    }, delay)
+   }
+   if (timeRemaining > TIME_ONE_DAY) {
+    tick(
+     `${Math.floor(
+      timeRemaining / TIME_ONE_DAY
+     )}d`,
+     TIME_ONE_DAY
+    )
+   } else if (timeRemaining > TIME_ONE_HOUR) {
+    tick(
+     `${Math.floor(
+      timeRemaining / TIME_ONE_HOUR
+     )}h`,
+     TIME_ONE_HOUR
+    )
+   } else if (timeRemaining > TIME_ONE_MINUTE) {
+    tick(
+     `${Math.floor(
+      timeRemaining / TIME_ONE_MINUTE
+     )}m`,
+     TIME_ONE_MINUTE
+    )
+   } else if (timeRemaining > 0) {
+    tick(
+     `${Math.floor(
+      timeRemaining / TIME_ONE_SECOND
+     )}s`,
+     TIME_ONE_SECOND
+    )
+   } else {
+    logoutNow()
+   }
+  }
+
   function setMessage(text: string) {
    message.textContent = text
   }
 
+  async function logoutNow() {
+   await clearAuth()
+   render()
+  }
+
   const logoutButton = themedButton.add(
-   withClick(async function () {
-    await clearAuth()
-    render()
-   }),
+   withClick(logoutNow),
    withTextContent('Logout')
   )({
    style: {
     backgroundColor: 'transparent',
     borderBottom: 'none',
+    borderLeft: '1px solid var(--theme4)',
     color: 'var(--theme8)',
     lineHeight: '22px',
     height: '100%',
@@ -244,9 +320,16 @@ export function authGuard(
     maxHeight: 'initial',
    },
   })
+
+  logoutButton.setAttribute(
+   'title',
+   'End the session now'
+  )
+
   accountTray.append(
    message,
    traySpacer(theme),
+   countdown,
    logoutButton
   )
 
@@ -254,7 +337,9 @@ export function authGuard(
    container: accountTray,
    destroy() {
     accountTray.remove()
+    clearTimeout(countdownTimeout)
    },
+   setExpiresAt,
    setMessage,
   }
  }
@@ -273,6 +358,7 @@ export function authGuard(
    accountBanner.setMessage(
     `Welcome, ${auth.user.username}`
    )
+   accountBanner.setExpiresAt(auth.expires_at)
    container.appendChild(
     accountBanner.container
    )

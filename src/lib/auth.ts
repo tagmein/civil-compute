@@ -10,7 +10,7 @@ interface AuthCreateResponse {
 }
 
 interface AuthGetResponse {
- expires_at: string
+ expires_at: number
  user: User
 }
 
@@ -30,9 +30,7 @@ export async function createAuth(
  username: string,
  password: string,
  createAccount: boolean
-): Promise<
- AuthCreateResponse | AuthError
-> {
+): Promise<AuthCreateResponse | AuthError> {
  const response = await fetch('/auth', {
   method: 'POST',
   headers: {
@@ -47,8 +45,7 @@ export async function createAuth(
 
  if (!response.ok) {
   try {
-   const responseBody =
-    await response.json()
+   const responseBody = await response.json()
    if ('error' in responseBody) {
     return responseBody
    }
@@ -63,8 +60,7 @@ export async function createAuth(
 
  const data =
   (await response.json()) as AuthCreateResponse
- const { access_token, expires_at } =
-  data
+ const { access_token, expires_at } = data
  localStorage.setItem(
   accessTokenStorageKey,
   JSON.stringify({
@@ -91,12 +87,9 @@ export function getAccessToken():
   JSON.parse(token) as AccessTokenData
 
  if (
-  Date.now() >=
-  new Date(expires_at).getTime()
+  Date.now() >= new Date(expires_at).getTime()
  ) {
-  localStorage.removeItem(
-   accessTokenStorageKey
-  )
+  localStorage.removeItem(accessTokenStorageKey)
   return
  }
 
@@ -125,8 +118,6 @@ export async function getAuth(): Promise<
 }
 
 export async function clearAuth() {
- localStorage.removeItem(
-  accessTokenStorageKey
- )
+ localStorage.removeItem(accessTokenStorageKey)
  return true
 }

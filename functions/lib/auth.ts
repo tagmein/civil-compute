@@ -5,6 +5,8 @@ import {
 
 const authNamespace = 'system/auth'
 
+const TIME_ONE_DAY = 24 * 60 * 60 * 1000 // 24 hours
+
 export function validateUsername(
  username: string
 ) {
@@ -54,8 +56,7 @@ export async function compareFixedTime(
  await new Promise((r) => {
   setTimeout(
    r,
-   duration +
-    Math.random() * duration * 0.1
+   duration + Math.random() * duration * 0.1
   )
   result =
    createHash('sha256')
@@ -90,13 +91,9 @@ export async function getUserSession(
  )
  const sessionKey = `${authNamespace}#sessions/${accessTokenHash}`
 
- const sessionString = await kv.get(
-  sessionKey
- )
+ const sessionString = await kv.get(sessionKey)
  const session = sessionString
-  ? (JSON.parse(
-     sessionString
-    ) as SessionData)
+  ? (JSON.parse(sessionString) as SessionData)
   : undefined
 
  if (!session) {
@@ -104,9 +101,7 @@ export async function getUserSession(
  }
 
  const userKey = `${authNamespace}#user-accounts/${session.username.toLowerCase()}`
- const userString = await kv.get(
-  userKey
- )
+ const userString = await kv.get(userKey)
  const user = userString
   ? (JSON.parse(userString) as UserData)
   : undefined
@@ -125,10 +120,9 @@ export async function createAccessTokenForUser(
  kv: KVNamespace,
  user: UserData,
  hashSalt: string,
- expiration_ttl = 1000 * 60 * 60 // 1 hour
+ expiration_ttl = TIME_ONE_DAY
 ) {
- const access_token =
-  createAccessToken()
+ const access_token = createAccessToken()
  const accessTokenHash = hash(
   access_token,
   hashSalt
@@ -136,8 +130,7 @@ export async function createAccessTokenForUser(
 
  const created_at = Date.now()
 
- const expires_at =
-  created_at + expiration_ttl
+ const expires_at = created_at + expiration_ttl
 
  const session: SessionData = {
   access_token_hash: accessTokenHash,
@@ -168,18 +161,12 @@ export async function createAuth(
  } catch (e) {
   return { error: e.message }
  }
- const username =
-  _username.toLowerCase()
+ const username = _username.toLowerCase()
  const userKey = `${authNamespace}#user-accounts/${username}`
- const userString = await kv.get(
-  userKey
- )
- let user: UserData | undefined =
-  userString
-   ? (JSON.parse(
-      userString
-     ) as UserData)
-   : undefined
+ const userString = await kv.get(userKey)
+ let user: UserData | undefined = userString
+  ? (JSON.parse(userString) as UserData)
+  : undefined
 
  if (user) {
   const { password_hash } = user
@@ -199,10 +186,7 @@ export async function createAuth(
      'Account creation temporarily suspended',
    }
   }
-  const passwordHash = hash(
-   password,
-   hashSalt
-  )
+  const passwordHash = hash(password, hashSalt)
   const created_at = Date.now()
   user = {
    created_at,
@@ -210,10 +194,7 @@ export async function createAuth(
    password_modified_at: created_at,
    username,
   }
-  await kv.put(
-   userKey,
-   JSON.stringify(user)
-  )
+  await kv.put(userKey, JSON.stringify(user))
  } else {
   return {
    error: 'User does not exist',
@@ -241,9 +222,7 @@ export interface User {
  username: string
 }
 
-function formatUser(
- user: UserData
-): User {
+function formatUser(user: UserData): User {
  return {
   created_at: new Date(
    user.created_at
