@@ -1,1 +1,0 @@
-# About Civil Compute Platform
