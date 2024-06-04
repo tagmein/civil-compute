@@ -25,13 +25,12 @@ globalThis.RSRC.get('vision').resolve(async function () {
      }
     }
     function setCell() {
-     const label = prompt('Enter label')
+     const cell = state.home[control.cellAddress(position)] ?? {}
+     const label = prompt('Enter label', cell.label)
      if (typeof label !== 'string') {
       return
      }
-     const cell = {
-      label,
-     }
+     cell.label = label
      store.ensureArrayItem('home.x', position.x)
      store.ensureArrayItem(`home.x=${position.x}.y`, position.y)
      store.setObject(`home.x=${position.x}.y=${position.y}.cell`, cell)
