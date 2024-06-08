@@ -24,6 +24,21 @@ globalThis.RSRC.get('store').resolve(async function () {
     }
     return existing
    },
+   get(k) {
+    const v = adapter.getItem(k)
+    if (typeof v !== 'string') {
+     return {}
+    }
+    try {
+     const x = JSON.parse(v)
+     return x
+    } catch (e) {
+     return
+    }
+   },
+   set(k, v) {
+    adapter.setItem(k, JSON.stringify(v))
+   },
    setArray(k, v) {
     if (!Array.isArray(v)) {
      throw new Error('must be an array')

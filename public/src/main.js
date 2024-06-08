@@ -28,14 +28,31 @@ globalThis.RSRC.get('main').resolve(async function () {
    function printValue(text, value) {
     const container = document.createElement('div')
     container.classList.add('result')
-    const typeTag = document.createElement('div')
-    typeTag.classList.add('tag')
-    typeTag.textContent = typeof value
     const inputText = document.createElement('div')
     inputText.classList.add('input')
     inputText.textContent = text
+    const typeTag = document.createElement('div')
+    typeTag.classList.add('tag')
     const valueText = document.createElement('span')
-    valueText.textContent = value
+    switch (typeof value) {
+     case 'object':
+      if (value === null) {
+       typeTag.textContent = 'null'
+       valueText.textContent = ''
+      } else if (Array.isArray(value)) {
+       typeTag.textContent = 'array'
+       valueText.textContent = `[ ${value.join(', ')} ]`
+      } else {
+       typeTag.textContent = 'object'
+       valueText.textContent = `${
+        Object.getPrototypeOf(value).constructor.name
+       } { ${Object.keys(value).join(', ')} }`
+      }
+      break
+     default:
+      typeTag.textContent = typeof value
+      valueText.textContent = value
+    }
     container.appendChild(inputText)
     container.appendChild(typeTag)
     container.appendChild(valueText)

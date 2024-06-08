@@ -11,6 +11,7 @@ globalThis.RSRC.get('civil').resolve(async function () {
       const name = word.substring(1)
       switch (type) {
        case wordType.NORMAL:
+        console.log(word, focus, args, name)
         if (typeof focus === 'function') {
          if (word.length > 0 && /^-?\d*(\.\d*)?$/.test(name)) {
           args.push(parseFloat(name))
