@@ -25,7 +25,7 @@ globalThis.RSRC.get('civil').resolve(async function () {
         }
         break
        case wordType.LITERAL:
-        throw new Error('not implemented')
+        args.push(name)
         break
        case wordType.QUOTE:
         throw new Error('not implemented')
