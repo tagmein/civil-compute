@@ -1,0 +1,85 @@
+*:focus {
+ box-shadow: inset 0 0 0.5em #80808040, inset 0 0 0.25em #80808040,
+  inset 0 0 0.125em #80808040, inset 0 0 0.0625em #80808040;
+ outline: none;
+}
+
+body {
+ display: flex;
+ flex-direction: row;
+ min-width: 100vw;
+ width: 720px;
+}
+
+.sidebar,
+.content {
+ overflow-x: hidden;
+ overflow-y: auto;
+}
+
+.sidebar {
+ background-color: #181818;
+ border-right: 1px solid #80808040;
+ max-width: 100vw;
+ width: 360px;
+ flex-shrink: 0;
+}
+
+.content {
+ flex-grow: 1;
+ min-width: 360px;
+}
+
+.content > input {
+ background-color: transparent;
+ color: #a0ff00;
+ border-bottom: 1px solid #80808040;
+ border-left: none;
+ border-right: none;
+ border-top: 1px solid #80808040;
+ box-sizing: border-box;
+ margin: 0;
+ padding: 1em;
+ width: 100%;
+}
+
+.error-message {
+ background-color: #80000080;
+ border-bottom: 1px solid #80000080;
+ border-left: none;
+ border-right: none;
+ border-top: 1px solid #80000080;
+ color: #f0000080;
+ margin: 0;
+ opacity: 1;
+ padding: 1em;
+ transition: opacity 1s ease;
+}
+
+.error-message.hide {
+ opacity: 0;
+}
+
+.result {
+ background-color: #80804080;
+ border-bottom: 1px solid #80804080;
+ border-left: none;
+ border-right: none;
+ border-top: 1px solid #80804080;
+ color: #f0f08080;
+ margin: 0;
+ margin-top: -1px;
+ opacity: 1;
+ padding: 1em;
+ transition: opacity 1s ease;
+}
+
+.tag {
+ background-color: #80808080;
+ border-radius: 0.25em;
+ display: inline;
+ font-size: 14px;
+ margin-right: 0.25em;
+ padding: 0.125em 0.25em;
+ vertical-align: 1px;
+}

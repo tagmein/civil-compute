@@ -4,24 +4,33 @@
   <meta charset="utf8" />
   <title>Civil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
- </head>
- <body>
+  <link rel="stylesheet" type="text/css" href="/theme.css" />
   <style>
-   body,
+   html,
+   body {
+    margin: 0;
+    padding: 0;
+   }
    html {
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
    }
    body {
-    background-color: #282828;
+    background-color: #202020;
+    color: #fffff0;
+    height: 100dvh;
    }
-   canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+   body,
+   input,
+   textarea,
+   select {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande',
+     'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: 18px;
    }
   </style>
+ </head>
+ <body>
   <script>
    const RSRC = (globalThis.RSRC = new Map())
    async function load(file) {
