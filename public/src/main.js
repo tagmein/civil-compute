@@ -1,90 +1,26 @@
 globalThis.RSRC.get('main').resolve(async function () {
- const store = (await load('store'))(localStorage)
- const civil = await load('civil')
- const library = await load('library')
- return {
-  run() {
-   const sidebar = document.createElement('aside')
-   sidebar.classList.add('sidebar')
-   document.body.appendChild(sidebar)
-   const content = document.createElement('main')
-   content.setAttribute('tabindex', '0')
-   content.classList.add('content')
-   document.body.appendChild(content)
-   const contentInput = document.createElement('input')
-   const contentInsert = document.createElement('div')
-   content.appendChild(contentInsert)
-   content.appendChild(contentInput)
-   contentInput.focus()
-   const root = {
-    ...library,
-    content,
-    document,
-    sidebar,
-    store,
-   }
-   const engine = civil.start(root)
-   root.civil = engine
-   function printValue(text, value) {
-    const container = document.createElement('div')
-    container.classList.add('result')
-    const inputText = document.createElement('div')
-    inputText.classList.add('input')
-    inputText.textContent = text
-    const typeTag = document.createElement('div')
-    typeTag.classList.add('tag')
-    const valueText = document.createElement('span')
-    switch (typeof value) {
-     case 'object':
-      if (value === null) {
-       typeTag.textContent = 'null'
-       valueText.textContent = ''
-      } else if (Array.isArray(value)) {
-       typeTag.textContent = 'array'
-       valueText.textContent = `[ ${value.join(', ')} ]`
-      } else {
-       typeTag.textContent = 'object'
-       valueText.textContent = `${
-        Object.getPrototypeOf(value).constructor.name
-       } { ${Object.keys(value).join(', ')} }`
-      }
-      break
-     default:
-      typeTag.textContent = typeof value
-      valueText.textContent = value
-    }
-    container.appendChild(inputText)
-    container.appendChild(typeTag)
-    container.appendChild(valueText)
-    contentInsert.insertAdjacentElement('afterend', container)
-    content.appendChild(contentInsert)
-    content.appendChild(contentInput)
-    contentInput.focus()
-   }
-   contentInput.setAttribute('name', 'content')
-   contentInput.addEventListener('keydown', function (event) {
-    if (event.key === 'Enter') {
-     try {
-      const text = contentInput.value
-      const result = root.civil.submit(text)
-      root._ = result
-      contentInput.value = ''
-      printValue(text, result)
-     } catch (e) {
-      const message = document.createElement('div')
-      message.classList.add('error-message')
-      message.textContent = e.message
-      console.error(e)
-      contentInput.insertAdjacentElement('afterend', message)
-      setTimeout(function () {
-       message.classList.add('hide')
-       setTimeout(function () {
-        message.remove()
-       }, 1000)
-      }, 2500)
-     }
-    }
-   })
-  },
+ const spark = await load('spark')
+ async function run() {
+  const home = spark(globalThis)
+  const doc = spark(home.get('document'))
+  const main = spark(doc.call('createElement', 'main'))
+  const body = spark(doc.get('body'))
+  body.call('appendChild', main.context)
+  const mainClassList = spark(main.get('classList'))
+  mainClassList.call('add', 'spark')
+
+  const style = spark(doc.call('createElement', 'style'))
+  style.set(
+   `
+.spark {
+ box-shadow: inset 0 0 2px 2px #fffff080;
+ flex-grow: 1;
+}
+   `,
+   'textContent'
+  )
+  const head = spark(doc.get('head'))
+  head.call('appendChild', style.context)
  }
+ return { run }
 })
