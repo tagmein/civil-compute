@@ -73,7 +73,7 @@ globalThis.RSRC.get('main').resolve(async function () {
  box-shadow: 0 0 2px #000;
  cursor: pointer;
  font-size: 13px;
- line-height: 9px;
+ line-height: 8px;
  margin: 4px 4px 3px;
  padding: 4px 4px 0;
  transition: background-color 0.1s linear;
