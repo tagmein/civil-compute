@@ -12,32 +12,34 @@ globalThis.RSRC.get('spark').resolve(async function () {
  const typeNames = Object.entries(typeIds)
   .sort(([_a, x], [_b, y]) => x - y)
   .map(([n]) => n)
- return function spark(context) {
-  const created = Date.now()
-  function setUndefined() {
+ return {
+  typeNames,
+  typeIds,
+  type: typeIds.undefined,
+  setUndefined(s) {
    s.type = typeIds.undefined
-  }
-  function setNull() {
+  },
+  setNull(s) {
    s.type = typeIds.null
-  }
-  function setBoolean(value) {
+  },
+  setBoolean(s, value) {
    s.type = typeIds.boolean
    s.boolean = typeof value === 'boolean' ? value : Boolean(value)
-  }
-  function setInteger(value) {
+  },
+  setInteger(s, value) {
    s.type = typeIds.integer
    s.integer =
     typeof value === 'number' ? Math.floor(value) : parseInt(String(value), 10)
-  }
-  function setDecimal(value) {
+  },
+  setDecimal(s, value) {
    s.type = typeIds.decimal
    s.decimal = typeof value === 'number' ? value : parseFloat(String(value), 10)
-  }
-  function setString(value) {
+  },
+  setString(s, value) {
    s.type = typeIds.string
    s.string = typeof value === 'string' ? value : String(value)
-  }
-  function setReference(value) {
+  },
+  setReference(s, value) {
    if (value === null) {
     setNull()
     return
@@ -47,45 +49,45 @@ globalThis.RSRC.get('spark').resolve(async function () {
    }
    s.type = typeIds.reference
    s.reference = value
-  }
-  function getBoolean() {
+  },
+  getBoolean(s) {
    if (typeof s.boolean === 'boolean') {
     return s.boolean
    }
    throw new Error('boolean not set')
-  }
-  function getInteger() {
+  },
+  getInteger(s) {
    if (typeof s.integer === 'number') {
     return s.integer
    }
    throw new Error('integer not set')
-  }
-  function getDecimal() {
+  },
+  getDecimal(s) {
    if (typeof s.decimal === 'number') {
     return s.decimal
    }
    throw new Error('decimal not set')
-  }
-  function getString() {
+  },
+  getString(s) {
    if (typeof s.string === 'string') {
     return s.string
    }
    throw new Error('string not set')
-  }
-  function getReference() {
+  },
+  getReference(s) {
    if (s.reference !== undefined) {
     return s.reference
    }
    throw new Error('reference not set')
-  }
-  function call(name, ...args) {
-   if (typeof context[name] !== 'function') {
+  },
+  call(s, name, ...args) {
+   if (typeof s[name] !== 'function') {
     throw new Error(`${JSON.stringify(name)} is not a function`)
    }
-   return context[name](...args)
-  }
-  function get(...path) {
-   let c = context
+   return s[name](...args)
+  },
+  get(s, ...path) {
+   let c = s
    for (const p of path) {
     if (c === undefined || c === null) {
      throw new Error(
@@ -97,9 +99,9 @@ globalThis.RSRC.get('spark').resolve(async function () {
     c = c[p]
    }
    return c
-  }
-  function set(value, ...path) {
-   let c = context
+  },
+  set(s, value, ...path) {
+   let c = s
    const lastP = path.pop()
    for (const p of path) {
     if (c === undefined || c === null) {
@@ -119,39 +121,6 @@ globalThis.RSRC.get('spark').resolve(async function () {
     )
    }
    c[lastP] = value
-  }
-  const s = {
-   // main
-   context,
-   created,
-   typeNames,
-   typeIds,
-   type: typeIds.undefined,
-   // functions
-   call,
-   get,
-   set,
-   // values
-   boolean: undefined,
-   integer: undefined,
-   decimal: undefined,
-   string: undefined,
-   reference: undefined,
-   // setters
-   setUndefined,
-   setNull,
-   setBoolean,
-   setInteger,
-   setDecimal,
-   setString,
-   setReference,
-   // getters
-   getBoolean,
-   getInteger,
-   getDecimal,
-   getString,
-   getReference,
-  }
-  return s
+  },
  }
 })
