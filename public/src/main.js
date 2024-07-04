@@ -49,10 +49,9 @@ globalThis.RSRC.get('main').resolve(async function () {
 
 .spark-control {
  background: #fffff020;
- border-bottom: 1px solid #80808080;
  border-top-left-radius: 4px;
  border-top-right-radius: 4px;
- box-shadow: 0 0 1px 1px #ffffff00;
+ box-shadow: inset 0 0 1px 1px #ffffff00;
  box-sizing: border-box;
  display: flex;
  flex-direction: row;
@@ -64,7 +63,7 @@ globalThis.RSRC.get('main').resolve(async function () {
 }
 
 .spark-control:hover {
- box-shadow: 0 0 1px 1px #fffff040;
+ box-shadow: inset 0 0 1px 1px #fffff040;
  opacity: 1;
 }
 
@@ -75,7 +74,7 @@ globalThis.RSRC.get('main').resolve(async function () {
  cursor: pointer;
  font-size: 13px;
  line-height: 9px;
- margin: 4px 4px 2px;
+ margin: 4px 4px 3px;
  padding: 4px 4px 0;
  transition: background-color 0.1s linear;
  white-space: nowrap;
@@ -90,6 +89,7 @@ globalThis.RSRC.get('main').resolve(async function () {
 }
 
 .spark-main {
+ box-shadow: inset 0 0 4px #00000040;
  display: flex;
  flex-direction: column;
  flex-grow: 1;
