@@ -19,7 +19,6 @@ globalThis.RSRC.get('createSpark').resolve(async function () {
    s.call(itemContainer, 'addEventListener', 'click', item.action)
    s.call(control, 'appendChild', itemContainer)
   }
-  console.log(config)
   if (config.content) {
    config.content(main)
   }

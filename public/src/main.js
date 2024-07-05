@@ -99,7 +99,7 @@ globalThis.RSRC.get('main').resolve(async function () {
    s.call(body, 'removeChild', spark.container)
   }
 
-  sourceSelect({ attachSpark, detachSpark })
+  sourceSelect({ attachSpark, detachSpark, doc })
  }
 
  return { run }
