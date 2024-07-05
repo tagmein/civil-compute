@@ -37,6 +37,7 @@ globalThis.RSRC.get('main').resolve(async function () {
  box-sizing: border-box;
  display: flex;
  flex-direction: row;
+ flex-shrink: 0;
  height: 25px;
  opacity: 0.85;
  overflow: auto;

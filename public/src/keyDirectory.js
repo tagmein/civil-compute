@@ -17,11 +17,12 @@ globalThis.RSRC.get('keyDirectory').resolve(async function () {
    let node = await getNode(path)
 
    for (let i = 0; i < key.length; i += 2) {
-    const chunk = key.substr(i, 2)
+    const chunk = key.substring(i, i + 2)
     node.ca++ // Increment total count for this node
     await setNode(path, node)
 
-    if (chunk.length === 1) {
+    if (i + 2 >= key.length) {
+     // This is the last chunk (1 or 2 characters)
      if (!node['k' + chunk]) {
       node.cl++ // Increment level count for this node
      }
@@ -29,6 +30,7 @@ globalThis.RSRC.get('keyDirectory').resolve(async function () {
      await setNode(path, node)
      return
     } else {
+     // Not the last chunk, continue traversing or create new node
      if (!node['x' + chunk]) {
       const newExtIndex = await getNextExtIndex()
       node['x' + chunk] = newExtIndex
@@ -42,6 +44,7 @@ globalThis.RSRC.get('keyDirectory').resolve(async function () {
     }
    }
 
+   // This should never be reached for non-empty keys
    if (!node['k']) {
     node.cl++ // Increment level count for this node
    }
@@ -57,10 +60,25 @@ globalThis.RSRC.get('keyDirectory').resolve(async function () {
    for (let i = 0; i < key.length; i += 2) {
     const chunk = key.substr(i, 2)
 
-    if (chunk.length === 1) {
-     return node['k' + chunk]
+    if (i + 2 >= key.length) {
+     // This is the last chunk (1 or 2 characters)
+     if (chunk.length === 1) {
+      return node['k' + chunk]
+     } else {
+      // Check for 'k' entry first, then 'x' entry
+      if ('k' + chunk in node) {
+       return node['k' + chunk]
+      } else if ('x' + chunk in node) {
+       path = KD_EXT_PREFIX + node['x' + chunk]
+       node = await getNode(path)
+       return node['k']
+      } else {
+       return undefined
+      }
+     }
     } else {
-     if (!node['x' + chunk]) {
+     // Not the last chunk, continue traversing
+     if (!('x' + chunk in node)) {
       return undefined
      }
      path = KD_EXT_PREFIX + node['x' + chunk]
@@ -68,7 +86,7 @@ globalThis.RSRC.get('keyDirectory').resolve(async function () {
     }
    }
 
-   return node['k']
+   return undefined // This line should never be reached for valid keys
   }
 
   async function deleteKey(key) {
@@ -77,7 +95,7 @@ globalThis.RSRC.get('keyDirectory').resolve(async function () {
    let node = await getNode(currentPath)
 
    for (let i = 0; i < key.length; i += 2) {
-    const chunk = key.substr(i, 2)
+    const chunk = key.substring(i, i + 2)
     path.push({ nodePath: currentPath, node, chunk })
 
     if (chunk.length === 1) {
@@ -142,9 +160,9 @@ globalThis.RSRC.get('keyDirectory').resolve(async function () {
 
    for (const [key, value] of Object.entries(node)) {
     if (key.startsWith('k')) {
-     keys.push({ key: prefix + key.substr(1), index: value })
+     keys.push({ key: prefix + key.substring(1), index: value })
     } else if (key.startsWith('x')) {
-     await traverseKeys(KD_EXT_PREFIX + value, prefix + key.substr(1), keys)
+     await traverseKeys(KD_EXT_PREFIX + value, prefix + key.substring(1), keys)
     }
    }
   }

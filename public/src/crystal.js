@@ -4,14 +4,8 @@ globalThis.RSRC.get('crystal').resolve(async function () {
   const keys = keyDirectory(base)
   const c = {
    keys,
-   sanitize(key) {
-    return btoa(key)
-   },
-   unsanitize(key) {
-    return atob(key)
-   },
    async deleteSegment(_key, offset = 0) {
-    const key = `k=${c.sanitize(_key)};s=${offset.toString(10)}`
+    const key = `k=${_key};s=${offset.toString(10)}`
     await base.removeItem(key)
    },
    async deleteSegments(from, to) {
@@ -25,11 +19,11 @@ globalThis.RSRC.get('crystal').resolve(async function () {
     await Promise.all(promises)
    },
    async deleteSegmentCount(_key) {
-    const key = `k=${c.sanitize(_key)};sc`
+    const key = `k=${_key};sc`
     await base.removeItem(key)
    },
    async getSegmentCount(_key) {
-    const key = `k=${c.sanitize(_key)};sc`
+    const key = `k=${_key};sc`
     const stringCount = await base.getItem(key)
     if (typeof stringCount !== 'string') {
      return undefined
@@ -41,21 +35,21 @@ globalThis.RSRC.get('crystal').resolve(async function () {
     return intCount
    },
    async setSegmentCount(_key, count) {
-    const key = `k=${c.sanitize(_key)};sc`
+    const key = `k=${_key};sc`
     await base.setItem(key, count.toString(10))
    },
    async getSegment(_key, offset = 0) {
-    const key = `k=${c.sanitize(_key)};s=${offset.toString(10)}`
+    const key = `k=${_key};s=${offset.toString(10)}`
     return base.getItem(key)
    },
    async setSegment(_key, value, offset) {
     if (typeof offset !== 'number') {
      throw new Error(`expecting number offset, got ${typeof offset}`)
     }
-    const key = `k=${c.sanitize(_key)};s=${offset.toString(10)}`
-    if (value.length > chunkSize) {
+    const key = `k=${_key};s=${offset.toString(10)}`
+    if (value.length > segmentSize) {
      throw new Error(
-      `Cannot set segment of size ${value.length} (limit ${chunkSize})`
+      `Cannot set segment of size ${value.length} (limit ${segmentSize})`
      )
     }
     await base.setItem(key, value)
@@ -94,15 +88,17 @@ globalThis.RSRC.get('crystal').resolve(async function () {
     const promises = []
     for (let i = 0; i < segmentCount; i++) {
      const offset = i * segmentSize
-     const segment = value.substring(offset, segmentSize)
+     const segment = value.substring(offset, offset + segmentSize)
      promises.push(c.setSegment(_key, segment, i))
     }
-    const existingSegmentCount = await base.getSegmentCount(_key)
+    const existingSegmentCount = await c.getSegmentCount(_key)
     if (
      typeof existingSegmentCount === 'number' &&
      existingSegmentCount > segmentCount
     ) {
-     promises.push(c.deleteSegments(segmentCount, existingSegmentCount - 1))
+     promises.push(
+      c.deleteSegments(_key, segmentCount, existingSegmentCount - 1)
+     )
     }
     promises.push(c.setSegmentCount(_key, segmentCount))
     await Promise.all(promises)
@@ -125,6 +121,7 @@ globalThis.RSRC.get('crystal').resolve(async function () {
    },
    async get(_key) {
     const index = await c.keys.lookupKey(_key)
+    console.log({ _key, index })
     if (index === undefined) {
      return undefined
     }
