@@ -13,7 +13,7 @@ globalThis.RSRC.get('loupe').resolve(async function () {
    style,
    `
     .loupe-container {
-      height: 400px;
+      height: calc(50dvh - 55px);
       overflow: auto;
     }
     .loupe-content {

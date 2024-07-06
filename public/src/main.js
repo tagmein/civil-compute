@@ -16,9 +16,6 @@ globalThis.RSRC.get('main').resolve(async function () {
  box-shadow: inset 0 0 1px 1px #fffff080, 0 0 25px #fffff040;
  display: flex;
  flex-direction: column;
- height: 480px;
- max-height: calc(100dvh - 40px);
- min-height: calc(50dvh - 30px);
  transition: filter 1s ease-out, opacity 0.1s linear;
  filter: brightness(1);
  opacity: 1;
