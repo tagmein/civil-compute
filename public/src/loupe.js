@@ -6,6 +6,7 @@ globalThis.RSRC.get('loupe').resolve(async function () {
  return function ({ attachSpark, detachSpark, doc, base }) {
   const look = crystal({ base })
   const withClose = _withClose({ attachSpark, detachSpark })
+  const keyValue = _keyValue({ attachSpark, detachSpark, doc })
   let _refresh
 
   // Add stylesheet
@@ -71,19 +72,20 @@ globalThis.RSRC.get('loupe').resolve(async function () {
     {
      label: 'Add',
      async action() {
-      _keyValue({ attachSpark, detachSpark, doc })
-      const k = 'Key:'
-      if (typeof k !== 'string') {
-       return
+      async function onConfirm(key, value) {
+       if (typeof key !== 'string') {
+        return
+       }
+       if (typeof value !== 'string') {
+        return
+       }
+       await s.call(look, 'set', key, value)
+       if (_refresh) {
+        await _refresh()
+       }
+       addSpark.close()
       }
-      const v = 'Value:'
-      if (typeof v !== 'string') {
-       return
-      }
-      await s.call(look, 'set', k, v)
-      if (_refresh) {
-       await _refresh()
-      }
+      const addSpark = keyValue({ onConfirm })
      },
     },
    ],

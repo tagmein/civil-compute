@@ -121,7 +121,6 @@ globalThis.RSRC.get('crystal').resolve(async function () {
    },
    async get(_key) {
     const index = await c.keys.lookupKey(_key)
-    console.log({ _key, index })
     if (index === undefined) {
      return undefined
     }
