@@ -11,6 +11,10 @@ globalThis.RSRC.get('createSpark').resolve(async function () {
   const main = s.call(doc, 'createElement', 'main')
   const mainClassList = s.get(main, 'classList')
   s.call(mainClassList, 'add', 'spark-main')
+  const header = s.call(doc, 'createElement', 'section')
+  const headerClassList = s.get(header, 'classList')
+  s.call(headerClassList, 'add', 'spark-header')
+  s.call(container, 'appendChild', header)
   s.call(container, 'appendChild', control)
   s.call(container, 'appendChild', main)
   for (const item of config.menu ?? []) {
@@ -18,6 +22,9 @@ globalThis.RSRC.get('createSpark').resolve(async function () {
    s.set(itemContainer, item.label, 'textContent')
    s.call(itemContainer, 'addEventListener', 'click', item.action)
    s.call(control, 'appendChild', itemContainer)
+  }
+  if (config.header) {
+   config.header(header)
   }
   if (config.content) {
    config.content(main)

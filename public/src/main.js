@@ -75,6 +75,11 @@ globalThis.RSRC.get('main').resolve(async function () {
  flex-grow: 1;
  overflow: auto;
 }
+
+.spark-header {
+ display: flex;
+ flex-direction: column;
+}
    `,
    'textContent'
   )
