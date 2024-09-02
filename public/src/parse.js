@@ -1,4 +1,4 @@
-globalThis.RSRC.get('parse').resolve(async function () {
+globalThis.LOAD['parse'].resolve(async function ({ load }) {
  function parse(source, exact) {
   const BREAK = '\n'
   const ESCAPE = '\\'

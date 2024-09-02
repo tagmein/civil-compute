@@ -1,4 +1,4 @@
-globalThis.RSRC.get('store').resolve(async function () {
+globalThis.LOAD['store'].resolve(async function ({ load }) {
  return function (adapter) {
   const s = {
    delete(k) {

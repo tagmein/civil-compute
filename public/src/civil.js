@@ -1,4 +1,4 @@
-globalThis.RSRC.get('civil').resolve(async function () {
+globalThis.LOAD['civil'].resolve(async function ({ load }) {
  const { parse, wordType } = await load('parse')
  return {
   start(root) {

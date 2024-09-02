@@ -1,70 +1,113 @@
-globalThis.RSRC.get('main').resolve(async function () {
+globalThis.LOAD['main'].resolve(async function ({ load }) {
  const store = (await load('store'))(localStorage)
  const civil = await load('civil')
  const library = await load('library')
+ const components = {
+  grid: await load('components/grid'),
+  pane: await load('components/pane'),
+  split: await load('components/split'),
+  text: await load('components/text')
+ }
+ console.log({ civil, library, store })
+ const mainStyle = document.createElement('style')
+ document.head.appendChild(mainStyle)
+ mainStyle.textContent = `
+.--components-split--container {
+ display: flex;
+ flex-direction: column;
+ height: 100%;
+ width: 100%;
+}
+.--components-split--container.--row {
+ flex-direction: row;
+}
+.--components-split--container > div {
+ flex-basis: 100px;
+ flex-grow: 1;
+ flex-shrink: 1;
+}
+.--components-pane--container {
+ box-shadow: inset 0 0 4px 8px #80808080;
+}
+.--components-pane--2 {
+ background-color: #800000;
+}
+.--components-pane--3 {
+ background-color: #808000;
+}
+.--components-pane--4 {
+ background-color: #008000;
+}
+.--components-grid--container {
+ align-items: center;
+ box-sizing: border-box;
+ display: grid;
+ height: 100%;
+ justify-content: center;
+ padding: 24px;
+}
+*::selection {
+ background: white;
+ color: black;
+}
+`
  return {
-  run() {
-   const sidebar = document.createElement('aside')
-   sidebar.classList.add('sidebar')
-   document.body.appendChild(sidebar)
-   const content = document.createElement('main')
-   content.setAttribute('tabindex', '0')
-   content.classList.add('content')
-   document.body.appendChild(content)
-   const contentInput = document.createElement('input')
-   const contentInsert = document.createElement('div')
-   content.appendChild(contentInsert)
-   content.appendChild(contentInput)
-   contentInput.focus()
+  run(parentElement) {
+   const contentClass = library.className(
+    'content',
+    `& {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }`
+   )
+   const content = contentClass.createElement('main', { tabindex: '0' })
+   parentElement.appendChild(content)
    const root = {
     ...library,
     content,
     document,
-    sidebar,
     store,
    }
    const engine = civil.start(root)
    root.civil = engine
-   function printValue(text, value) {
-    const container = document.createElement('div')
-    container.classList.add('result')
-    const inputText = document.createElement('div')
-    inputText.classList.add('input')
-    inputText.textContent = text
-    const typeTag = document.createElement('div')
-    typeTag.classList.add('tag')
-    const valueText = document.createElement('span')
-    switch (typeof value) {
-     case 'object':
-      if (value === null) {
-       typeTag.textContent = 'null'
-       valueText.textContent = ''
-      } else if (Array.isArray(value)) {
-       typeTag.textContent = 'array'
-       valueText.textContent = `[ ${value.join(', ')} ]`
-      } else {
-       typeTag.textContent = 'object'
-       valueText.textContent = `${
-        Object.getPrototypeOf(value).constructor.name
-       } { ${Object.keys(value).join(', ')} }`
-      }
-      break
-     default:
-      typeTag.textContent = typeof value
-      valueText.textContent = value
-    }
-    container.appendChild(inputText)
-    container.appendChild(typeTag)
-    container.appendChild(valueText)
-    contentInsert.insertAdjacentElement('afterend', container)
-    content.appendChild(contentInsert)
-    content.appendChild(contentInput)
-    contentInput.focus()
+
+   function autoText(t) {
+    const inner = components.text(t, { auto: true })
+    const outer = components.grid({ a: inner.element })
+    const stopAutoSize = inner.autoSize(outer)
+    // @todo handle autoText unmount and stopAutoSize()
+    return outer
    }
-   contentInput.setAttribute('name', 'content')
-   contentInput.addEventListener('keydown', function (event) {
-    if (event.key === 'Enter') {
-     try {
+   
+   function numberedPane(a, o) {
+    return components.pane({ a, options: { ...(o ? o : {}), number: true } })
+   }
+
+   const A = numberedPane( autoText('Hello').element ),
+         B = numberedPane( autoText('World').element ),
+         D = numberedPane( autoText('World').element ),
+         C = numberedPane( autoText('Hello').element )
+   
+   content.appendChild(
+    components.split({
+     options: {
+      direction: 'row'
+     },
+     a: components.split({
+      a: A.element,
+      b: B.element
+     }).element,
+     b: components.split({
+      a: C.element,
+      b: D.element
+     }).element
+    }).element
+   )
+   /**
+ * / try {
       const text = contentInput.value
       const result = root.civil.submit(text)
       root._ = result
@@ -83,8 +126,7 @@ globalThis.RSRC.get('main').resolve(async function () {
        }, 1000)
       }, 2500)
      }
-    }
-   })
+ /**/
   },
  }
 })
