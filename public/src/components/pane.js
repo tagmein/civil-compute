@@ -18,4 +18,3 @@ globalThis.LOAD['components/pane'].resolve(async function ({ load }) {
   return { element }
  }
 })
-

@@ -20,7 +20,7 @@ globalThis.LOAD['components/text'].resolve(async function ({ load }) {
      }, 0)
     const currentFontSizeUnit = fontSize.slice(unitPlace)
     if (currentFontSizeUnit !== 'px') {
-     console.warn('autosize: font size must be in px')
+     console.warn('autosize: font size must be in px, got', fontSize)
      return
     }
     const currentFontSize = parseFloat(fontSize.slice(0, unitPlace))
@@ -45,7 +45,6 @@ globalThis.LOAD['components/text'].resolve(async function ({ load }) {
      (currentViewportSize.height - currentPaddingTop - currentPaddingBottom) /
      currentSize.height
     const scale = Math.min(fillX, fillY)
-    console.log({ fillY, fillX, scale })
     element.style.fontSize = `${scale * currentFontSize}${currentFontSizeUnit}`
     element.style.transform = `scale(${1 / scale})`
     setTimeout(function () {
