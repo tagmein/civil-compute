@@ -3,8 +3,9 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
  const civil = await load('civil')
  const library = await load('library')
  const components = {
-  menu: await load('components/menu'),
+  doc: await load('components/doc'),
   grid: await load('components/grid'),
+  menu: await load('components/menu'),
   pane: await load('components/pane'),
   split: await load('components/split'),
   text: await load('components/text'),
@@ -18,9 +19,12 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
  flex-direction: column;
  height: 100%;
  width: 100%;
+ overflow-x: hidden;
+ overflow-y: scroll;
 }
 .--components-split--container.--row {
  flex-direction: row;
+ overflow-y: hidden;
 }
 .--components-split--container > div {
  flex-basis: 100px;
@@ -48,7 +52,11 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
  padding: 24px;
 }
 .--components-menu--container {
- height: 100%;
+ flex-grow: 1;
+ outline-offset: -15px;
+ outline: 3px solid #f0f0f080;
+ overflow-x: hidden;
+ overflow-y: scroll;
  padding: 10px 0;
 }
 .--components-menu--container > div {
@@ -61,6 +69,7 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
 .--components-menu--container > div:hover {
  background-color: #a8c4e0;
  color: #8e4c0a;
+ transform-origin: left middle;
  transform: scale(1.05);
  transition: transform 0.75s, filter 0.25s;
 }
@@ -70,10 +79,28 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
 }
 .--components-pane--container {
  height: 100%;
+ display: flex;
+ flex-direction: column;
+}
+.--components-doc-highlight {
+ box-shadow: 0 0 40px inset #ffff8080;
 }
 *::selection {
  background: white;
  color: black;
+}
+.--components-doc--container {
+ margin: 10px 0;
+ padding: 0 20px;
+}
+.--components-doc--container > div {
+ background-color: #80402080;
+ border: 1px solid #80808080;
+ color: #fff;
+ padding: 10px 10px;
+}
+.components-doc--container:last-of-type {
+ margin-bottom: 20px;
 }
 `
  return {
@@ -111,31 +138,73 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
     return components.pane({ a, options: { ...(o ? o : {}), number: true } })
    }
 
-   function startMenu(o) {
-    const a = components.menu(g)
+   function startMenu(o, menuIndex) {
+    const a = components.menu({
+     ...g,
+     getMenu() {
+      return menus[menuIndex]
+     },
+    })
     return components.pane({
      a: a.element,
      options: { ...(o ? o : {}), number: true },
     })
    }
 
+   const CIVIL_VERSION = '0.0.1'
+
+   const LICENSE = [
+    `== Civil Compute is hereby placed in to the ==`,
+    `== PUBLIC DOMAIN ==`,
+    `== Copying is permitted ==`,
+    `== with or without retaining ==`,
+    `== this notice. Use at your own risk, ==`,
+    `== as no warranties of fitnenss for ==`,
+    `== any particular purpose are expressed ==`,
+    `== or implied under this public offering. ==`,
+   ]
+
    const aboutCivil = [
-    'About Civil',
-    function () {
-     console.log(`Civil Compute 0.0.1`)
+    'About Civil Compute',
+    function (menu) {
+     console.log(`Civil Compute ${CIVIL_VERSION}`)
+     const about = components.doc({
+      components,
+      items: [
+       [
+        components.text(`Civil Compute ${CIVIL_VERSION}`).element,
+        undefined,
+        'About Civil Compute',
+       ],
+      ],
+      name: 'About Civil Compute',
+     })
+     menu.element.appendChild(about.element)
     },
    ]
 
    const printLicense = [
     'Print License',
     function () {
-     console.log(`== PUBLIC DOMAIN ==`)
-     console.log(`== Copying is permitted ==`)
-     console.log(`== with or without retaining ==`)
-     console.log(`== this notice. Use at your own risk, ==`)
-     console.log(`== as no warranties of fitnenss for ==`)
-     console.log(`== any particular purpose are expressed ==`)
-     console.log(`== or implied under this public offering. ==`)
+     for (const l of LICENSE) {
+      console.log(l)
+     }
+    },
+   ]
+
+   const viewLicense = [
+    'View License',
+    function (menu) {
+     const license = components.doc({
+      components,
+      items: LICENSE.map((l, i) => [
+       components.text(l.replace(/(^==\s*|\s*==$)/g, '')).element,
+       undefined,
+       `Item ${i}`,
+      ]),
+      name: 'Civil Compute License',
+     })
+     menu.element.appendChild(license.element)
     },
    ]
 
@@ -151,10 +220,15 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
    ]
 
    const g = {
-    items: [aboutCivil, printLicense, visitRepository],
+    items: [aboutCivil, printLicense, viewLicense, visitRepository],
     components,
    }
-   const menus = [startMenu(g), startMenu(g), startMenu(g), startMenu(g)]
+   const menus = [
+    startMenu(g, 0),
+    startMenu(g, 1),
+    startMenu(g, 2),
+    startMenu(g, 3),
+   ]
 
    const _A = numberedPane(autoText('Hello').element),
     _B = numberedPane(autoText('World').element),

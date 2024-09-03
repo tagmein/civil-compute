@@ -1,6 +1,6 @@
 globalThis.LOAD['components/menu'].resolve(async function ({ load }) {
  let menuCount = 0
- return ({ a, b, classNames, components, items, options }) => {
+ return ({ a, b, classNames, components, items, options, getMenu }) => {
   const element = document.createElement('section')
   element.dataset.name = 'menu'
   if (classNames?.container) {
@@ -23,13 +23,15 @@ globalThis.LOAD['components/menu'].resolve(async function ({ load }) {
    element.appendChild(itemContainer)
    itemContainer.setAttribute('tabindex', 0)
    itemContainer.addEventListener('click', async function () {
-    console.log(`action ${JSON.stringify(name)}...`)
+    console.log(`menu item action ${JSON.stringify(name)}...`)
     try {
-     await action()
-     console.log(`action success :: ${JSON.stringify(name)} is now complete`)
+     await action(getMenu())
+     console.log(
+      `menu item action success :: ${JSON.stringify(name)} is now complete`
+     )
     } catch (e) {
      console.error(
-      `action failure :: ${JSON.stringify(name)} failed because ${
+      `menu item action failure :: ${JSON.stringify(name)} failed because ${
        e.message ?? String(e)
       }`
      )
