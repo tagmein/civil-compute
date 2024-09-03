@@ -18,11 +18,17 @@ globalThis.LOAD['components/menu'].resolve(async function ({ load }) {
   if (b) {
    element.appendChild(b)
   }
-  for (const [name, action] of items ?? []) {
+  for (const [name, action, itemOptions = {}] of items ?? []) {
    const itemContainer = document.createElement('div')
    element.appendChild(itemContainer)
+   if (itemOptions.enabled === false) {
+    itemContainer.classList.add('--disabled')
+   }
    itemContainer.setAttribute('tabindex', 0)
    itemContainer.addEventListener('click', async function () {
+    if (itemOptions.enabled === false) {
+     return
+    }
     console.log(`menu item action ${JSON.stringify(name)}...`)
     try {
      await action(getMenu())

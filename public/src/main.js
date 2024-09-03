@@ -2,6 +2,8 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
  const store = (await load('store'))(localStorage)
  const civil = await load('civil')
  const library = await load('library')
+ function component() {}
+ function theme() {}
  const components = {
   doc: await load('components/doc'),
   grid: await load('components/grid'),
@@ -10,97 +12,36 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
   split: await load('components/split'),
   text: await load('components/text'),
  }
- console.log({ civil, library, store })
+ function autoText(t) {
+  const inner = components.text(t, { auto: true })
+  const outer = components.grid({ a: inner.element })
+  const stopAutoSize = inner.autoSize(outer)
+  // @todo handle autoText unmount and stopAutoSize()
+  return outer
+ }
+
+ function numberedPane(a, o) {
+  return components.pane({ a, options: { ...(o ? o : {}), number: true } })
+ }
+
+ function startMenu(getMenus, base, o, menuIndex) {
+  const a = components.menu({
+   ...base,
+   getMenu() {
+    return getMenus()[menuIndex]
+   },
+  })
+  return components.pane({
+   a: a.element,
+   options: { ...(o ? o : {}), number: true },
+  })
+ }
+ const themes = {
+  standard: await load('themes/standard'),
+ }
  const mainStyle = document.createElement('style')
  document.head.appendChild(mainStyle)
- mainStyle.textContent = `
-.--components-split--container {
- display: flex;
- flex-direction: column;
- height: 100%;
- width: 100%;
-}
-.--components-split--container.--row {
- flex-direction: row;
- overflow-y: hidden;
-}
-.--components-split--container > div {
- flex-basis: 100px;
- flex-grow: 1;
- flex-shrink: 1;
-}
-.--components-pane--container {
- box-shadow: inset 0 0 4px 8px #80808080;
-}
-.--components-pane--2 {
- background-color: #800000;
-}
-.--components-pane--3 {
- background-color: #808000;
-}
-.--components-pane--4 {
- background-color: #008000;
-}
-.--components-grid--container {
- align-items: center;
- box-sizing: border-box;
- display: grid;
- height: 100%;
- justify-content: center;
- padding: 24px;
-}
-.--components-menu--container {
- flex-grow: 1;
- outline-offset: -15px;
- outline: 3px solid #f0f0f080;
- padding: 10px 0;
-}
-.--components-menu--container > div {
- cursor: pointer;
- flex-grow: 1;
- padding: 10px 20px;
- display: flex;
- align-items: center;
-}
-.--components-menu--container > div:hover {
- background-color: #a8c4e0;
- color: #8e4c0a;
- transform-origin: left middle;
- transform: scale(1.05);
- transition: transform 0.75s, filter 0.25s;
-}
-.--components-menu--container > div:active {
- transform: scale(0.95);
- filter: blur(20px);
-}
-.--components-pane--container {
- height: 100%;
- display: flex;
- flex-direction: column;
- overflow-x: hidden;
- overflow-y: scroll;
-}
-.--components-doc-highlight {
- box-shadow: 0 0 40px inset #ffff8080;
-}
-*::selection {
- background: white;
- color: black;
-}
-.--components-doc--container {
- margin: 10px 0;
- padding: 0 20px;
-}
-.--components-doc--container > div {
- background-color: #80402080;
- border: 1px solid #80808080;
- color: #fff;
- padding: 10px 10px;
-}
-.components-doc--container:last-of-type {
- margin-bottom: 20px;
-}
-`
+ mainStyle.textContent = themes.standard
  return {
   run(parentElement) {
    const contentClass = library.className(
@@ -117,47 +58,32 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
    parentElement.appendChild(content)
    const root = {
     ...library,
+    components,
+    civilEngine: civil,
     content,
     document,
     store,
+    themes,
+    main: {
+     autoText,
+     mainStyle,
+     numberedPane,
+     startMenu,
+    },
    }
+   console.log({ root })
    const engine = civil.start(root)
    root.civil = engine
-
-   function autoText(t) {
-    const inner = components.text(t, { auto: true })
-    const outer = components.grid({ a: inner.element })
-    const stopAutoSize = inner.autoSize(outer)
-    // @todo handle autoText unmount and stopAutoSize()
-    return outer
-   }
-
-   function numberedPane(a, o) {
-    return components.pane({ a, options: { ...(o ? o : {}), number: true } })
-   }
-
-   function startMenu(o, menuIndex) {
-    const a = components.menu({
-     ...g,
-     getMenu() {
-      return menus[menuIndex]
-     },
-    })
-    return components.pane({
-     a: a.element,
-     options: { ...(o ? o : {}), number: true },
-    })
-   }
 
    const CIVIL_VERSION = '0.0.1'
 
    const LICENSE = [
     `== Civil Compute is hereby placed in to the ==`,
-    `== PUBLIC DOMAIN ==`,
+    `== PUBLIC DOMAIN. ==`,
     `== Copying is permitted ==`,
     `== with or without retaining ==`,
     `== this notice. Use at your own risk, ==`,
-    `== as no warranties of fitnenss for ==`,
+    `== as no warranties of fitness for ==`,
     `== any particular purpose are expressed ==`,
     `== or implied under this public offering. ==`,
    ]
@@ -172,7 +98,14 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
        [
         components.text(`Civil Compute ${CIVIL_VERSION}`).element,
         undefined,
-        'About Civil Compute',
+        'Name & Version',
+       ],
+       [
+        components.text(
+         `A platform for building software applications collaboratively.`
+        ).element,
+        undefined,
+        'Description',
        ],
       ],
       name: 'About Civil Compute',
@@ -222,10 +155,10 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
     components,
    }
    const menus = [
-    startMenu(g, 0),
-    startMenu(g, 1),
-    startMenu(g, 2),
-    startMenu(g, 3),
+    startMenu(() => menus, g, undefined, 0),
+    startMenu(() => menus, g, undefined, 1),
+    startMenu(() => menus, g, undefined, 2),
+    startMenu(() => menus, g, undefined, 3),
    ]
 
    const _A = numberedPane(autoText('Hello').element),

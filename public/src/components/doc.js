@@ -12,6 +12,9 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
    console.log(docCount, 'number')
    element.classList.add('--components-doc--' + ++docCount)
   }
+  const label = document.createElement('label')
+  label.textContent = name
+  element.appendChild(label)
   if (a) {
    element.appendChild(a)
   }
@@ -31,6 +34,7 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
      return newMenu
     },
     items: [
+     [itemElement.textContent, undefined, { enabled: false }],
      [
       JSON.stringify(name) + ' ⏵ ' + JSON.stringify(itemName),
       function () {
@@ -48,19 +52,31 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
       function () {
        action(newMenu)
       },
+      {
+       enabled: typeof action === 'function',
+      },
      ],
     ],
    })
    return newMenu
   }
   function openMenu(itemElement, action, name) {
-   element.appendChild(
-    docMenu([itemElement, action, name ?? 'Untitled Document']).element
-   )
+   const newMenu = docMenu([
+    itemElement,
+    action,
+    name ?? 'Untitled Document',
+   ]).element
+   element.appendChild(newMenu)
+   newMenu.scrollIntoView({ behavior: 'smooth' })
   }
-  for (const [itemElement, action, name = 'Untitled'] of items ?? []) {
+  for (const itemIndex in items ?? []) {
+   const [itemElement, action, name = 'Untitled'] = items[itemIndex]
    const itemContainer = document.createElement('div')
+   const indexContainer = document.createElement('div')
+   indexContainer.classList.add('--index')
+   indexContainer.textContent = itemIndex.toString(10)
    element.appendChild(itemContainer)
+   itemContainer.appendChild(indexContainer)
    itemContainer.appendChild(itemElement)
    itemContainer.setAttribute('tabindex', 0)
    itemContainer.addEventListener('click', async function () {
