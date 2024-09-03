@@ -19,8 +19,6 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
  flex-direction: column;
  height: 100%;
  width: 100%;
- overflow-x: hidden;
- overflow-y: scroll;
 }
 .--components-split--container.--row {
  flex-direction: row;
@@ -55,8 +53,6 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
  flex-grow: 1;
  outline-offset: -15px;
  outline: 3px solid #f0f0f080;
- overflow-x: hidden;
- overflow-y: scroll;
  padding: 10px 0;
 }
 .--components-menu--container > div {
@@ -81,6 +77,8 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
  height: 100%;
  display: flex;
  flex-direction: column;
+ overflow-x: hidden;
+ overflow-y: scroll;
 }
 .--components-doc-highlight {
  box-shadow: 0 0 40px inset #ffff8080;
