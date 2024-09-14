@@ -24,9 +24,10 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
   function closeDoc() {
    element.remove()
   }
-  const docMenu = ([itemElement, action, itemName = 'Untitled']) => {
+  const docMenu = ([itemElement, action, itemName = 'Untitled'], onClose) => {
    function closeMenu() {
     element.removeChild(newMenu.element)
+    onClose?.()
    }
    const newMenu = components.menu({
     components,
@@ -36,7 +37,7 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
     items: [
      [itemElement.textContent, undefined, { enabled: false }],
      [
-      JSON.stringify(name) + ' ⏵ ' + JSON.stringify(itemName),
+      JSON.stringify(name) + ' → ' + JSON.stringify(itemName),
       function () {
        itemElement.scrollIntoView({ behavior: 'smooth' })
        itemElement.classList.add('--components-doc-highlight')
@@ -60,15 +61,16 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
    })
    return newMenu
   }
-  function openMenu(itemElement, action, name) {
-   const newMenu = docMenu([
-    itemElement,
-    action,
-    name ?? 'Untitled Document',
-   ]).element
-   element.appendChild(newMenu)
-   newMenu.scrollIntoView({ behavior: 'smooth' })
+  function openMenu(itemElement, action, name, onClose) {
+   const newMenu = docMenu(
+    [itemElement, action, name ?? 'Untitled Document'],
+    onClose
+   )
+   element.appendChild(newMenu.element)
+   newMenu.element.scrollIntoView({ behavior: 'smooth' })
+   return newMenu
   }
+  const menus = {}
   for (const itemIndex in items ?? []) {
    const [itemElement, action, name = 'Untitled'] = items[itemIndex]
    const itemContainer = document.createElement('div')
@@ -80,18 +82,29 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
    itemContainer.appendChild(itemElement)
    itemContainer.setAttribute('tabindex', 0)
    itemContainer.addEventListener('click', async function () {
-    console.log(`doc action ${JSON.stringify(name)}...`)
-    try {
-     await (action ?? openMenu(itemElement, action, name))(thisDoc)
-     console.log(
-      `doc action success :: ${JSON.stringify(name)} is now complete`
-     )
-    } catch (e) {
-     console.error(
-      `doc action failure :: ${JSON.stringify(name)} failed because ${
-       e.message ?? String(e)
-      }`
-     )
+    if (action) {
+     console.log(`doc action ${JSON.stringify(name)}...`)
+     try {
+      await action(thisDoc)
+      console.log(
+       `doc action success :: ${JSON.stringify(name)} is now complete`
+      )
+     } catch (e) {
+      console.error(
+       `doc action failure :: ${JSON.stringify(name)} failed because ${
+        e.message ?? String(e)
+       }`
+      )
+     }
+    } else {
+     const menu = menus[itemIndex]
+     if (menu) {
+      menu.element.scrollIntoView({ behavior: 'smooth' })
+     } else {
+      menus[itemIndex] = openMenu(itemElement, action, name, () => {
+       delete menus[itemIndex]
+      })
+     }
     }
    })
   }

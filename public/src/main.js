@@ -2,8 +2,6 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
  const store = (await load('store'))(localStorage)
  const civil = await load('civil')
  const library = await load('library')
- function component() {}
- function theme() {}
  const components = {
   doc: await load('components/doc'),
   grid: await load('components/grid'),
@@ -173,16 +171,21 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
 
    content.appendChild(
     components.split({
+     key: 'main',
      options: {
       direction: 'row',
      },
      a: components.split({
+      key: 'main-a',
       a: A.element,
       b: B.element,
+      options: { noScroll: true },
      }).element,
      b: components.split({
+      key: 'main-b',
       a: C.element,
       b: D.element,
+      options: { noScroll: true },
      }).element,
     }).element
    )

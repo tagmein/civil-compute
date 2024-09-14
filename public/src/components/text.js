@@ -11,7 +11,13 @@ globalThis.LOAD['components/text'].resolve(async function ({ load }) {
     return getComputedStyle(el).getPropertyValue(k)
    }
    function measure() {
-    const fontSize = computedStyle(element, 'font-size')
+    let fontSize = computedStyle(element, 'font-size')
+    if (fontSize === '') {
+     fontSize = computedStyle(document.body, 'font-size')
+    }
+    if (fontSize === '') {
+     fontSize = '16px'
+    }
     const unitPlace =
      1 +
      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reduce((a, n) => {

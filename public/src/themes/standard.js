@@ -4,17 +4,46 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  display: flex;
  flex-direction: column;
  height: 100%;
+ position: relative;
  width: 100%;
+}
+.--components-split--container.--no-scroll {
+ overflow: hidden;
 }
 .--components-split--container.--row {
  flex-direction: row;
  overflow-y: hidden;
+}
+.--components-split--container.--split-a > div.--b {
+ display: none;
+}
+.--components-split--container.--split-b > div.--a {
+ display: none;
 }
 .--components-split--container > div {
  flex-basis: 100px;
  flex-grow: 1;
  flex-shrink: 1;
 }
+.--components-split--container > section.--control {
+ background-color: #80808080;
+ border-radius: 50%;
+ box-shadow: inset 0 0 4px 8px #ffffff40;
+ cursor: pointer;
+ height: 16px;
+ left: 0;
+ position: absolute;
+ top: 50%;
+ transform: translateX(-50%) translateY(-50%);
+ width: 16px;
+}
+.--components-split--container > section.--control:hover {
+ box-shadow: inset 0 0 4px 8px #ffffff80, 0 0 4px 0 #ffffff80;
+}
+ .--components-split--container.--row > section.--control {
+  left: 50%;
+  top: 0;
+ }
 .--components-pane--container {
  box-shadow: inset 0 0 4px 8px #80808080;
 }
@@ -42,12 +71,12 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  padding: 10px 0;
 }
 .--components-menu--container > div {
+ align-items: center;
  border-bottom: 1px solid #40404040;
  cursor: pointer;
- flex-grow: 1;
- padding: 10px 20px;
  display: flex;
- align-items: center;
+ flex-grow: 1;
+ padding: 10px 22px;
  }
 .--components-menu--container > div.--disabled {
  color: #f0f0f080;
@@ -61,17 +90,16 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  transition: transform 0.75s, filter 0.25s;
 }
 .--components-menu--container > div:not(.--disabled):active {
- transform: scale(0.95);
  filter: blur(20px);
+ transform: scale(0.95);
 }
 .--components-pane--container {
  box-sizing: border-box;
- height: 100%;
  display: flex;
  flex-direction: column;
+ height: 100%;
  overflow-x: hidden;
- overflow-y: scroll;
- padding-bottom: 10px;
+ overflow-y: auto;
 }
 .--components-doc-highlight {
  box-shadow: 0 0 40px inset #ffff8080;
@@ -87,35 +115,37 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
 .--components-doc--container > label {
  display: block;
  font-size: 14px;
- padding: 0 10px 10px;
  font-weight: bold;
+ padding: 0 10px 10px;
 }
 .--components-doc--container > div + div {
  border-top: none;
 }
 .--components-doc--container > div {
- display: flex;
- flex-direction: row;
- gap: 10px;
+ align-items: stretch;
  background-color: #80402080;
  border: 1px solid #80808080;
  color: #fff;
+ display: flex;
+ flex-direction: row;
+ gap: 10px;
 }
 .--components-doc--container > div > .--index {
  background-color: #80808040;
  border-right: #40404040;
+ box-sizing: border-box;
  color: #f0f0f080;
- width: 50px;
- text-align: right;
+ flex-grow: 0;
+ flex-shrink: 0;
  font-family: monospace;
  padding: 10px;
- box-sizing: border-box;
- height: 100%;
- flex-shrink: 0;
- flex-grow: 0;
+ text-align: right;
+ width: 50px;
 }
 .--components-doc--container > div > .--components-text--container {
+ overflow-x: auto;
+ overflow-y: hidden;
  padding: 10px;
-}
+  }
 `
 })

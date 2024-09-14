@@ -11,8 +11,7 @@
     padding: 0;
    }
    html {
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: hidden;
    }
    body {
     background-color: #202020;
@@ -46,7 +45,7 @@
     const main = await load('main')
     main.run(document.body)
    }
-   start().catch(e => console.error(e))
+   start().catch((e) => console.error(e))
   </script>
  </body>
 </html>

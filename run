@@ -1,2 +1,2 @@
 #!/bin/bash
-python -m http.server -d public
+python3 ./home.py
