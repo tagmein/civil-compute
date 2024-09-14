@@ -1,5 +1,6 @@
 globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
  let docCount = 0
+ const highlight = await load('highlight')
  return ({ a, b, classNames, components, items, name, options }) => {
   const element = document.createElement('section')
   element.dataset.name = 'doc'
@@ -39,11 +40,7 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
      [
       JSON.stringify(name) + ' → ' + JSON.stringify(itemName),
       function () {
-       itemElement.scrollIntoView({ behavior: 'smooth' })
-       itemElement.classList.add('--components-doc-highlight')
-       setTimeout(function () {
-        itemElement.classList.remove('--components-doc-highlight')
-       }, 250)
+       highlight({ element: itemElement, options: { scrollIntoView: true } })
       },
      ],
      ['Close Menu', closeMenu],
@@ -67,7 +64,7 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
     onClose
    )
    element.appendChild(newMenu.element)
-   newMenu.element.scrollIntoView({ behavior: 'smooth' })
+   highlight({ element: newMenu.element, options: { scrollIntoView: true } })
    return newMenu
   }
   const menus = {}
@@ -99,7 +96,7 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
     } else {
      const menu = menus[itemIndex]
      if (menu) {
-      menu.element.scrollIntoView({ behavior: 'smooth' })
+      highlight({ element: menu.element, options: { scrollIntoView: true } })
      } else {
       menus[itemIndex] = openMenu(itemElement, action, name, () => {
        delete menus[itemIndex]

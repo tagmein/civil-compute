@@ -101,7 +101,7 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  overflow-x: hidden;
  overflow-y: auto;
 }
-.--components-doc-highlight {
+.--components-highlight {
  box-shadow: 0 0 40px inset #ffff8080;
 }
 *::selection {
