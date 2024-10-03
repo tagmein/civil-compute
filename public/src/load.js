@@ -3,7 +3,7 @@ const LOAD = (globalThis.LOAD = {}),
   (rootUrl = '/', namePrefix = '') =>
   async (urlPath) => {
    const fullUrlPath = `${namePrefix}${urlPath}`
-   console.log('load', fullUrlPath)
+   // console.log('load', fullUrlPath)
    if (fullUrlPath in LOAD) {
     return LOAD[fullUrlPath].promise
    }

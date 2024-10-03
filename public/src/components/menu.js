@@ -1,6 +1,10 @@
 globalThis.LOAD['components/menu'].resolve(async function ({ load }) {
+ const components = {
+  commander: await load('commander')
+ }
+ console.log({ components })
  let menuCount = 0
- return ({ a, b, classNames, components, items, options, getMenu }) => {
+ return ({ a, b, classNames, components: rootComponents, items, options, getMenu }) => {
   const element = document.createElement('section')
   element.dataset.name = 'menu'
   if (classNames?.container) {
@@ -18,6 +22,7 @@ globalThis.LOAD['components/menu'].resolve(async function ({ load }) {
   if (b) {
    element.appendChild(b)
   }
+  const commander = components.commander()
   for (const [name, action, itemOptions = {}] of items ?? []) {
    const itemContainer = document.createElement('div')
    element.appendChild(itemContainer)
@@ -43,8 +48,10 @@ globalThis.LOAD['components/menu'].resolve(async function ({ load }) {
      )
     }
    })
-   itemContainer.appendChild(components.text(name).element)
+   itemContainer.appendChild(rootComponents.text(name).element)
   }
+  element.appendChild(commander.element)
+  element.addEventListener('click', () => commander.element.focus())
   return { element }
  }
 })

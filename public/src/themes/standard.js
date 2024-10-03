@@ -45,7 +45,7 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
   top: 0;
  }
 .--components-pane--container {
- box-shadow: inset 0 0 4px 8px #80808080;
+ box-shadow: inset 0 0 2px 2px #80808080;
 }
 .--components-pane--2 {
  background-color: #800000;
@@ -65,10 +65,20 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  padding: 24px;
 }
 .--components-menu--container {
- flex-grow: 1;
+ flex-grow: 0;
+ flex-shrink: 0;
  outline-offset: -15px;
  outline: 3px solid #f0f0f080;
- padding: 10px 0;
+ padding: 15px 0;
+}
+.--components-menu--container > input {
+ background-color: transparent;
+ border: none;
+ color: inherit;
+ font-family: inherit;
+ font-size: inherit;
+ padding: 10px 22px;
+ width: 100%;
 }
 .--components-menu--container > div {
  align-items: center;
@@ -87,17 +97,17 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  color: #8e4c0a;
  transform-origin: 100px center;
  transform: scale(1.05);
- transition: transform 0.75s, filter 0.25s;
+ transition: transform 0.25s ease, filter 0.25s ease;
 }
 .--components-menu--container > div:not(.--disabled):active {
- filter: blur(20px);
+ filter: blur(1px);
  transform: scale(0.95);
 }
 .--components-pane--container {
  box-sizing: border-box;
  display: flex;
  flex-direction: column;
- height: 100%;
+ height: auto; /*100%;*/
  overflow-x: hidden;
  overflow-y: auto;
 }
@@ -147,5 +157,65 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  overflow-y: hidden;
  padding: 10px;
   }
+.--components-view {
+ display: flex;
+ flex-direction: row;
+}
+.--components-view--control {
+ box-sizing: border-box;
+ display: flex;
+ flex-direction: column;
+ gap: 4px;
+ padding: 16px 4px;
+ width: 24px;
+}
+.--components-view--control > button {
+ box-sizing: border-box;
+ height: 16px;
+ width: 16px;
+ border-radius: 16px;
+ border: 1px solid #808080;
+}
+.--components-view--control--Close {
+ background-color: #c00000;
+}
+.--components-view--control--Minimize {
+ background-color: #c0c000;
+}
+.--components-view--control--Zoom {
+ background-color: #00c000;
+}
+.--components-view--tray {
+ position: fixed;
+ bottom: 0;
+ left: 24px;
+ right: 24px;
+ border-top-left-radius: 24px;
+ border-top-right-radius: 24px;
+ height: 64px;
+ box-sizing: border-box;
+ border: 1px solid #808080;
+ background-color: #404040;
+ border-bottom: none;
+ box-shadow: 0 0 64px #ffffff40;
+ gap: 8px;
+ padding: 8px;
+ z-index: 1000000;
+}
+.--components-view--tray > div {
+ border: 1px solid #808080;
+ background-color: #a0a0a0;
+ height: 48px;
+ min-width: 48px;
+ max-width: 240px;
+ flex-shrink: 0;
+ flex-grow: 1;
+ border-radius: 16px;
+ display: grid;
+ align-items: center;
+ justify-content: center;
+ text-overflow: ellipsis;
+ overflow: hidden;
+}
 `
 })

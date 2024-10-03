@@ -8,7 +8,6 @@ globalThis.LOAD['components/pane'].resolve(async function ({ load }) {
    element.classList.add('--components-pane--container')
   }
   if (options?.number) {
-   console.log(paneCount, 'number')
    element.classList.add('--components-pane--' + ++paneCount)
   }
   element.appendChild(a)

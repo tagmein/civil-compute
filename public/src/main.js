@@ -9,6 +9,7 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
   pane: await load('components/pane'),
   split: await load('components/split'),
   text: await load('components/text'),
+  view: await load('components/view'),
  }
  function autoText(t) {
   const inner = components.text(t, { auto: true })
@@ -21,18 +22,23 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
  function numberedPane(a, o) {
   return components.pane({ a, options: { ...(o ? o : {}), number: true } })
  }
+ 
+ function v(a) {
+  return components.view({ a: a.element })
+ }
 
- function startMenu(getMenus, base, o, menuIndex) {
+ function startMenu(base, o) {
   const a = components.menu({
    ...base,
    getMenu() {
-    return getMenus()[menuIndex]
+    return m
    },
   })
-  return components.pane({
+  const m = v(components.pane({
    a: a.element,
    options: { ...(o ? o : {}), number: true },
-  })
+  }))
+  return m
  }
  const themes = {
   standard: await load('themes/standard'),
@@ -89,7 +95,6 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
    const aboutCivil = [
     'About Civil Compute',
     function (menu) {
-     console.log(`Civil Compute ${CIVIL_VERSION}`)
      const about = components.doc({
       components,
       items: [
@@ -108,8 +113,33 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
       ],
       name: 'About Civil Compute',
      })
-     menu.element.appendChild(about.element)
+     menu.element.appendChild(v(about).element)
     },
+   ]
+   
+   const connectLocalStorage = [
+    'Local Storage',
+    function (menu) {
+    
+    }
+   ]
+   
+   const connectMenu = {
+    items: [connectLocalStorage]
+   }
+   
+   const connectTo = [
+    'Connect to...',
+    function (menu) {
+     const a = components.menu({
+      ...connectMenu,
+      components,
+      getMenu() {
+       return a
+      },
+     })
+     menu.element.appendChild(v(a).element)
+    }
    ]
 
    const printLicense = [
@@ -133,7 +163,7 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
       ]),
       name: 'Civil Compute License',
      })
-     menu.element.appendChild(license.element)
+     menu.element.appendChild(v(license).element)
     },
    ]
 
@@ -149,26 +179,27 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
    ]
 
    const g = {
-    items: [aboutCivil, printLicense, viewLicense, visitRepository],
+    items: [aboutCivil, connectTo, printLicense, viewLicense, visitRepository],
     components,
    }
-   const menus = [
-    startMenu(() => menus, g, undefined, 0),
-    startMenu(() => menus, g, undefined, 1),
-    startMenu(() => menus, g, undefined, 2),
-    startMenu(() => menus, g, undefined, 3),
-   ]
 
    const _A = numberedPane(autoText('Hello').element),
     _B = numberedPane(autoText('World').element),
     _D = numberedPane(autoText('World').element),
     _C = numberedPane(autoText('Hello').element)
 
-   const A = numberedPane(menus[0].element),
-    B = numberedPane(menus[1].element),
-    D = numberedPane(menus[2].element),
-    C = numberedPane(menus[3].element)
+   function openStartMenuNow() {
+    const a = startMenu(g, undefined, 0)
+    content.appendChild(a.element)
+    a.element.scrollIntoView()
+   }
+   const launchCivilMenu = document.createElement('div')
+   launchCivilMenu.textContent = 'Civil'
+   launchCivilMenu.addEventListener('click', openStartMenuNow)
+   window.viewTray.appendChild(launchCivilMenu)
+   openStartMenuNow()
 
+   /**
    content.appendChild(
     components.split({
      key: 'main',
@@ -188,7 +219,7 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
       options: { noScroll: true },
      }).element,
     }).element
-   )
+   ) */
    /**
  * / try {
       const text = contentInput.value
