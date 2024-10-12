@@ -67,13 +67,16 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
 .--components-menu--container {
  flex-grow: 0;
  flex-shrink: 0;
- outline-offset: -15px;
+ outline-offset: -5px;
  outline: 3px solid #f0f0f080;
  padding: 15px 0;
+ min-width: 55vw !important;
+ width: 440px !important;
 }
 .--components-menu--container > input {
  background-color: transparent;
  border: none;
+ box-sizing: border-box;
  color: inherit;
  font-family: inherit;
  font-size: inherit;
@@ -96,7 +99,6 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  background-color: #a8c4e0;
  color: #8e4c0a;
  transform-origin: 100px center;
- transform: scale(1.05);
  transition: transform 0.25s ease, filter 0.25s ease;
 }
 .--components-menu--container > div:not(.--disabled):active {
@@ -107,9 +109,12 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  box-sizing: border-box;
  display: flex;
  flex-direction: column;
+ flex-grow: 1;
+ flex-shrink: 0;
  height: auto; /*100%;*/
  overflow-x: hidden;
  overflow-y: auto;
+ 
 }
 .--components-highlight {
  box-shadow: 0 0 40px inset #ffff8080;
@@ -161,10 +166,16 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  display: flex;
  flex-direction: row;
 }
+body > main > .--components-view {
+ padding-right: 45vw;
+ width: fit-content;
+}
 .--components-view--control {
  box-sizing: border-box;
  display: flex;
  flex-direction: column;
+ flex-grow: 0;
+ flex-shrink: 0;
  gap: 4px;
  padding: 16px 4px;
  width: 24px;
@@ -216,6 +227,10 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  justify-content: center;
  text-overflow: ellipsis;
  overflow: hidden;
+}
+
+.--components-commander {
+ width: 100%;
 }
 `
 })

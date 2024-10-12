@@ -22,8 +22,17 @@ globalThis.LOAD['components/menu'].resolve(async function ({ load }) {
   if (b) {
    element.appendChild(b)
   }
-  const commander = components.commander()
+  const commander = options?.commander === false
+   ? undefined
+   : components.commander()
   for (const [name, action, itemOptions = {}] of items ?? []) {
+   if (typeof name === 'string') {}
+   else if (typeof name !== 'undefined') {
+    if (name instanceof HTMLElement) {
+     element.appendChild(name)
+     continue
+    }
+   }
    const itemContainer = document.createElement('div')
    element.appendChild(itemContainer)
    if (itemOptions.enabled === false) {
@@ -35,23 +44,17 @@ globalThis.LOAD['components/menu'].resolve(async function ({ load }) {
      return
     }
     console.log(`menu item action ${JSON.stringify(name)}...`)
-    try {
-     await action(getMenu())
-     console.log(
-      `menu item action success :: ${JSON.stringify(name)} is now complete`
-     )
-    } catch (e) {
-     console.error(
-      `menu item action failure :: ${JSON.stringify(name)} failed because ${
-       e.message ?? String(e)
-      }`
-     )
-    }
+    await action(getMenu())
+    console.log(
+     `menu item action success :: ${JSON.stringify(name)} is now complete`
+    )
    })
    itemContainer.appendChild(rootComponents.text(name).element)
   }
-  element.appendChild(commander.element)
-  element.addEventListener('click', () => commander.element.focus())
+  if (commander) {
+   element.appendChild(commander.element)
+   element.addEventListener('click', () => commander.element.focus())
+  }
   return { element }
  }
 })

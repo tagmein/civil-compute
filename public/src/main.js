@@ -2,7 +2,11 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
  const store = (await load('store'))(localStorage)
  const civil = await load('civil')
  const library = await load('library')
+ globalThis.numberedPane = function numberedPane(a, o) {
+  return components.pane({ a, options: { ...(o ? o : {}), number: true } })
+ }
  const components = {
+  commander: await load('components/commander'),
   doc: await load('components/doc'),
   grid: await load('components/grid'),
   menu: await load('components/menu'),
@@ -17,10 +21,6 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
   const stopAutoSize = inner.autoSize(outer)
   // @todo handle autoText unmount and stopAutoSize()
   return outer
- }
-
- function numberedPane(a, o) {
-  return components.pane({ a, options: { ...(o ? o : {}), number: true } })
  }
  
  function v(a) {
@@ -58,7 +58,13 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
       bottom: 0;
     }`
    )
-   const content = contentClass.createElement('main', { tabindex: '0' })
+   const content = contentClass.createElement('main', {
+    tabindex: '0',
+    style: `
+     overflow-x: auto;
+     overflow-y: hidden;
+    `
+   })
    parentElement.appendChild(content)
    const root = {
     ...library,
@@ -114,15 +120,36 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
       name: 'About Civil Compute',
      })
      menu.element.appendChild(v(about).element)
+     setTimeout(() => content.scrollLeft = content.scrollWidth, 120)
     },
    ]
    
    const connectLocalStorage = [
     'Local Storage',
-    function (menu) {
-    
-    }
-   ]
+    function (menu) { 
+     const commanderElement = components.commander({
+       connection: { name: 'Local Storage', value: localStorage },
+       components,
+       getMenu() {
+        return g
+       },
+      }).element
+     const a = components.menu({
+      components,
+      options: {
+       commander: false,
+      },
+      items: [
+       [ commanderElement ]
+     ],
+     getMenu() {
+      return a
+     },
+    })
+    menu.element.parentElement.appendChild(v(a).element)
+    setTimeout(() => content.scrollLeft = content.scrollWidth, 120)
+   }
+  ]
    
    const connectMenu = {
     items: [connectLocalStorage]
@@ -139,6 +166,7 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
       },
      })
      menu.element.appendChild(v(a).element)
+     setTimeout(() => content.scrollLeft = content.scrollWidth, 120)
     }
    ]
 
@@ -164,6 +192,7 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
       name: 'Civil Compute License',
      })
      menu.element.appendChild(v(license).element)
+     setTimeout(() => content.scrollLeft = content.scrollWidth, 120)
     },
    ]
 
