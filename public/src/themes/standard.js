@@ -83,7 +83,7 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  padding: 10px 22px;
  width: 100%;
 }
-.--components-menu--container > div {
+.--components-menu--container > div.--menu-item-container {
  align-items: center;
  border-bottom: 1px solid #40404040;
  cursor: pointer;
@@ -91,17 +91,17 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  flex-grow: 1;
  padding: 10px 22px;
  }
-.--components-menu--container > div.--disabled {
+.--components-menu--container > div.--menu-item-container.--disabled {
  color: #f0f0f080;
  cursor: text;
 }
-.--components-menu--container > div:not(.--disabled):hover {
+.--components-menu--container > div.--menu-item-container:not(.--disabled):hover {
  background-color: #a8c4e0;
  color: #8e4c0a;
  transform-origin: 100px center;
  transition: transform 0.25s ease, filter 0.25s ease;
 }
-.--components-menu--container > div:not(.--disabled):active {
+.--components-menu--container > div.--menu-item-container:not(.--disabled):active {
  filter: blur(1px);
  transform: scale(0.95);
 }
@@ -228,9 +228,22 @@ body > main > .--components-view {
  text-overflow: ellipsis;
  overflow: hidden;
 }
-
 .--components-commander {
  width: 100%;
+}
+.--component-explorer-form > input,
+.--component-explorer-form > textarea {
+ background-color: transparent;
+ margin-bottom: 15px;
+ border: 2px solid #40404040;
+ color: #ffffff;
+ padding: 10px;
+}
+.--component-explorer-form > button {
+ background-color: #80808080;
+ border: 2px solid #40404040;
+ color: #ffffff;
+ padding: 10px;
 }
 `
 })

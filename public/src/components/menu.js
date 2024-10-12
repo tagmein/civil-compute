@@ -34,13 +34,14 @@ globalThis.LOAD['components/menu'].resolve(async function ({ load }) {
     }
    }
    const itemContainer = document.createElement('div')
+   itemContainer.classList.add('--menu-item-container')
    element.appendChild(itemContainer)
-   if (itemOptions.enabled === false) {
+   if (itemOptions.enabled === false || typeof action !== 'function') {
     itemContainer.classList.add('--disabled')
    }
    itemContainer.setAttribute('tabindex', 0)
    itemContainer.addEventListener('click', async function () {
-    if (itemOptions.enabled === false) {
+    if (itemOptions.enabled === false || typeof action !== 'function') {
      return
     }
     console.log(`menu item action ${JSON.stringify(name)}...`)

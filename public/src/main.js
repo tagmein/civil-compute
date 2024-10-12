@@ -8,6 +8,7 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
  const components = {
   commander: await load('components/commander'),
   doc: await load('components/doc'),
+  explorer: await load('components/explorer'),
   grid: await load('components/grid'),
   menu: await load('components/menu'),
   pane: await load('components/pane'),
@@ -127,6 +128,13 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
    const connectLocalStorage = [
     'Local Storage',
     function (menu) { 
+     const explorerInstance = components.explorer({
+       connection: { name: 'Local Storage', value: localStorage },
+       components,
+       getMenu() {
+        return g
+       },
+     })
      const commanderElement = components.commander({
        connection: { name: 'Local Storage', value: localStorage },
        components,
@@ -140,6 +148,7 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
        commander: false,
       },
       items: [
+       [ explorerInstance.element ],
        [ commanderElement ]
      ],
      getMenu() {
