@@ -130,14 +130,16 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
   max-height: 100vh;
   min-width: 528px;
   overflow: auto;
-  padding-bottom: 5em;
-  padding: 0 20px 10px;
+  padding: 0 20px 5em;
 }
 .--components-doc--container > label {
- display: block;
- font-size: 14px;
- font-weight: bold;
- padding: 10px;
+  background-color: #80808080;
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 10px;
+  position: sticky;
+  top: 0;
 }
 .--components-view.--minimized .--components-doc--container > label {
 height: 281px;
