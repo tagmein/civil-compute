@@ -112,11 +112,6 @@ function explorerNewItemForm(
   }
   submitButton.removeAttribute('disabled')
  })
- Object.assign(formElement.style, {
-  display: 'flex',
-  flexDirection: 'column',
-  padding: '15px',
- })
  const keyInput = document.createElement('input')
  keyInput.setAttribute('name', 'key')
  keyInput.setAttribute('placeholder', 'Key')

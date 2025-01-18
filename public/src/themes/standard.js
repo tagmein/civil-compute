@@ -57,7 +57,7 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  max-height: 100%;
  overflow-x: hidden;
  overflow-y: auto;
- padding-bottom: 10px;
+ padding-bottom: 5em;
 }
 .--components-pane--2 {
  background-color: #800000;
@@ -334,6 +334,13 @@ body > main > .--components-view.--minimized {
 .--components-commander {
  width: 100%;
 }
+ .--component-explorer-form  {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  max-height: 100vh;
+  overflow: auto;
+ }
 .--component-explorer-form > input,
 .--component-explorer-form > textarea {
  background-color: transparent;
