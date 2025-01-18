@@ -1,7 +1,7 @@
 globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
  let docCount = 0
  const highlight = await load('highlight')
- return ({ a, b, classNames, components, items, name, options }) => {
+ return ({ a, b, classNames, components, items, name, options, onClose }) => {
   const element = document.createElement('section')
   element.dataset.name = 'doc'
   if (classNames?.container) {
@@ -24,6 +24,7 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
   }
   function closeDoc() {
    element.remove()
+   onClose?.()
   }
   const docMenu = ([itemElement, action, itemName = 'Untitled'], onClose) => {
    function closeMenu() {
@@ -69,16 +70,28 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
   }
   const menus = {}
   for (const itemIndex in items ?? []) {
-   const [itemElement, action, name = 'Untitled'] = items[itemIndex]
+   const [itemElement, action, name = undefined] = items[itemIndex]
+   const itemWrapper = document.createElement('div')
+   itemWrapper.appendChild(itemElement)
+   itemWrapper.classList.add('--components-doc--item-value')
    const itemContainer = document.createElement('div')
    const indexContainer = document.createElement('div')
    indexContainer.classList.add('--index')
    indexContainer.textContent = itemIndex.toString(10)
    element.appendChild(itemContainer)
    itemContainer.appendChild(indexContainer)
-   itemContainer.appendChild(itemElement)
+   const itemOuterWrapper = document.createElement('div')
+   itemOuterWrapper.appendChild(itemWrapper)
+   if (name !== undefined) {
+    itemOuterWrapper.appendChild(document.createElement('label'))
+    itemOuterWrapper.lastElementChild.classList.add(
+     '--components-doc--item-name'
+    )
+    itemOuterWrapper.lastElementChild.textContent = name
+   }
+   itemContainer.appendChild(itemOuterWrapper)
    itemContainer.setAttribute('tabindex', 0)
-   itemContainer.addEventListener('click', async function () {
+   indexContainer.addEventListener('click', async function () {
     if (action) {
      console.log(`doc action ${JSON.stringify(name)}...`)
      try {
@@ -105,7 +118,7 @@ globalThis.LOAD['components/doc'].resolve(async function ({ load }) {
     }
    })
   }
-  const thisDoc = { element }
+  const thisDoc = { element, onClose }
   return thisDoc
  }
 })

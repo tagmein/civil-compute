@@ -126,13 +126,53 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
 .--components-doc--container {
  margin: 0;
  padding: 0 20px 10px;
+ min-width: 528px;
 }
 .--components-doc--container > label {
  display: block;
  font-size: 14px;
  font-weight: bold;
- padding: 0 10px 10px;
+ padding: 10px;
 }
+.--components-view.--minimized .--components-doc--container > label {
+height: 281px;
+left: -7px;
+overflow: hidden;
+pointer-events: none;
+position: absolute;
+text-overflow: ellipsis;
+top: calc(100% - 300px);
+transform: rotate(-90deg);
+white-space: nowrap;
+width: 100%;
+width: 281px;
+}
+.--components-doc--item-value {
+ padding: 10px;
+}
+.--components-doc--item-name {
+ background-color: #80808020;
+ color: #001020;
+ display: block;
+ font-size: 12px;
+ font-weight: bold;
+ overflow: hidden;
+ padding: 10px;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+ text-decoration: underline;
+}
+
+.--components-doc--item-name:hover {
+ background-color: #80808080;
+ color: #405060;
+}
+
+.--components-doc--item-name:active {
+ background-color: #80808080;
+ color: #203040;
+}
+
 .--components-doc--container > div + div {
  border-top: none;
 }
@@ -143,7 +183,7 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  color: #fff;
  display: flex;
  flex-direction: row;
- gap: 10px;
+ gap: 0;
 }
 .--components-doc--container > div > .--index {
  background-color: #80808040;
@@ -153,23 +193,71 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  flex-grow: 0;
  flex-shrink: 0;
  font-family: monospace;
+ position: relative;
  padding: 10px;
  text-align: right;
  width: 50px;
 }
+
+.--components-doc--container > div > .--index:hover::after {
+  content: '𝍢';
+  display: block;
+  position: absolute;
+  left: 4px;
+  top: 8px;
+ }
+.--components-doc--container > div > .--index:active::after {
+ color: #80808080;
+}
+
 .--components-doc--container > div > .--components-text--container {
  overflow-x: auto;
  overflow-y: hidden;
  padding: 10px;
   }
 .--components-view {
+ background-color: #80808080;
+ border-left: 1px solid #404040;
+ border-right: 1px solid #a0a0a0;
  display: flex;
  flex-direction: row;
+ position: relative;
 }
+
+.--components-view.--maximized {
+ background-color: #000000;
+ bottom: 0;
+ box-shadow: inset 0 0 10px 10px #80808080;
+ height: 100vh;
+ left: 0;
+ overflow: auto;
+ position: fixed;
+ right: 0;
+ top: 0;
+ width: 100vw;
+}
+
+.--components-view.--minimized {
+ width: 25px !important;
+ overflow: hidden;
+ opacity: 0.25;
+}
+
+
+.--components-view.--minimized:hover {
+ opacity: 0.95;
+}
+
 body > main > .--components-view {
  padding-right: 45vw;
  width: fit-content;
 }
+body > main > .--components-view.--minimized {
+ padding-right: 0;
+}
+ body > main > .--components-view.--maximized {
+  padding-right: 0;
+ }
 .--components-view--control {
  box-sizing: border-box;
  display: flex;
@@ -186,6 +274,13 @@ body > main > .--components-view {
  width: 16px;
  border-radius: 16px;
  border: 1px solid #808080;
+ opacity: 0.5;
+}
+.--components-view--control > button:hover {
+ opacity: 1;
+}
+.--components-view--control > button:active {
+ opacity: 0.75;
 }
 .--components-view--control--Close {
  background-color: #c00000;

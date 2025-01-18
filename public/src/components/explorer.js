@@ -24,10 +24,10 @@ globalThis.LOAD['components/explorer'].resolve(async function ({ load }) {
   function onCreateNewItem({ key, value }) {
    connectionValue.setItem(key, value)
    console.log(`Updated ${JSON.stringify(key)} to:`, value)
+   explorerInstance.onChangeKey(key, value)
   }
-  element.appendChild(
-   explorerInterface(onCreateNewItem, connectionValue).element
-  )
+  const explorerInstance = explorerInterface(onCreateNewItem, connectionValue)
+  element.appendChild(explorerInstance.element)
   return { element: numberedPane(element).element }
  }
 })
@@ -85,7 +85,7 @@ function explorerInterface(onCreateNewItem, connectionValue) {
  }
  // Set the initial key
  onChangeKey(initialKey, connectionValue.getItem(initialKey))
- return { element: containerElement }
+ return { element: containerElement, onChangeKey }
 }
 
 function explorerNewItemForm(
@@ -126,7 +126,6 @@ function explorerNewItemForm(
  for (const event of events) {
   keyInput.addEventListener(event, function () {
    const value = connectionValue.getItem(keyInput.value)
-   console.log('onChangeKey', keyInput.value, '=', value)
    onChangeKey(keyInput.value, value)
   })
  }

@@ -23,9 +23,9 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
   // @todo handle autoText unmount and stopAutoSize()
   return outer
  }
- 
+
  function v(a) {
-  return components.view({ a: a.element })
+  return components.view(a)
  }
 
  function startMenu(base, o) {
@@ -35,10 +35,12 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
     return m
    },
   })
-  const m = v(components.pane({
-   a: a.element,
-   options: { ...(o ? o : {}), number: true },
-  }))
+  const m = v(
+   components.pane({
+    a: a.element,
+    options: { ...(o ? o : {}), number: true },
+   })
+  )
   return m
  }
  const themes = {
@@ -47,6 +49,14 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
  const mainStyle = document.createElement('style')
  document.head.appendChild(mainStyle)
  mainStyle.textContent = themes.standard
+
+ function autoScroll(content) {
+  setTimeout(
+   () => (content.scrollLeft = content.scrollWidth - window.innerWidth - 64),
+   120
+  )
+ }
+
  return {
   run(parentElement) {
    const contentClass = library.className(
@@ -64,7 +74,7 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
     style: `
      overflow-x: auto;
      overflow-y: hidden;
-    `
+    `,
    })
    parentElement.appendChild(content)
    const root = {
@@ -119,51 +129,52 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
        ],
       ],
       name: 'About Civil Compute',
+      onClose() {
+       aboutView.close()
+      },
      })
-     menu.element.appendChild(v(about).element)
-     setTimeout(() => content.scrollLeft = content.scrollWidth, 120)
+     const aboutView = v(about)
+     menu.element.appendChild(aboutView.element)
+     autoScroll(content)
     },
    ]
-   
+
    const connectLocalStorage = [
     'Local Storage',
-    function (menu) { 
+    function (menu) {
      const explorerInstance = components.explorer({
-       connection: { name: 'Local Storage', value: localStorage },
-       components,
-       getMenu() {
-        return g
-       },
+      connection: { name: 'Local Storage', value: localStorage },
+      components,
+      getMenu() {
+       return g
+      },
      })
      const commanderElement = components.commander({
-       connection: { name: 'Local Storage', value: localStorage },
-       components,
-       getMenu() {
-        return g
-       },
-      }).element
+      connection: { name: 'Local Storage', value: localStorage },
+      components,
+      getMenu() {
+       return g
+      },
+     }).element
      const a = components.menu({
       components,
       options: {
        commander: false,
       },
-      items: [
-       [ explorerInstance.element ],
-       [ commanderElement ]
-     ],
-     getMenu() {
-      return a
-     },
-    })
-    menu.element.parentElement.appendChild(v(a).element)
-    setTimeout(() => content.scrollLeft = content.scrollWidth, 120)
-   }
-  ]
-   
+      items: [[explorerInstance.element], [commanderElement]],
+      getMenu() {
+       return a
+      },
+     })
+     menu.element.parentElement.appendChild(v(a).element)
+     autoScroll(content)
+    },
+   ]
+
    const connectMenu = {
-    items: [connectLocalStorage]
+    items: [connectLocalStorage],
    }
-   
+
    const connectTo = [
     'Connect to...',
     function (menu) {
@@ -175,8 +186,8 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
       },
      })
      menu.element.appendChild(v(a).element)
-     setTimeout(() => content.scrollLeft = content.scrollWidth, 120)
-    }
+     autoScroll(content)
+    },
    ]
 
    const printLicense = [
@@ -199,9 +210,13 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
        `Item ${i}`,
       ]),
       name: 'Civil Compute License',
+      onClose() {
+       licenseView.close()
+      },
      })
-     menu.element.appendChild(v(license).element)
-     setTimeout(() => content.scrollLeft = content.scrollWidth, 120)
+     const licenseView = v(license)
+     menu.element.appendChild(licenseView.element)
+     autoScroll(content)
     },
    ]
 
