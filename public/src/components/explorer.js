@@ -38,6 +38,9 @@ function explorerInterface(onCreateNewItem, connectionValue) {
   itemForm.submitButton.textContent =
    value !== null ? 'Update entry' : 'Create entry'
   filterDisplayList(key, value)
+  itemForm.valueInput.style.height =
+   localStorage.getItem(`[explorer]height:${key}`) ?? '100px'
+  itemForm.valueInput.value = value ?? ''
  }
  const initialKey = Object.keys(connectionValue)[0] ?? ''
  const itemForm = explorerNewItemForm(
@@ -126,6 +129,14 @@ function explorerNewItemForm(
  }
  const valueInput = document.createElement('textarea')
  valueInput.setAttribute('placeholder', 'Value')
+ valueInput.style.resize = 'vertical'
+ valueInput.addEventListener('mouseup', function () {
+  console.log('stored new height', valueInput.style.height)
+  localStorage.setItem(
+   `[explorer]height:${keyInput.value}`,
+   valueInput.style.height
+  )
+ })
  formElement.appendChild(keyInput)
  formElement.appendChild(valueInput)
  formElement.appendChild(submitButton)
