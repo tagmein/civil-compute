@@ -57,7 +57,7 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
  max-height: 100%;
  overflow-x: hidden;
  overflow-y: auto;
- padding-bottom: 5em;
+ padding: 15px 0 5em;
 }
 .--components-pane--2 {
  background-color: #800000;
@@ -79,14 +79,13 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
 .--components-menu--container {
  flex-grow: 0;
  flex-shrink: 0;
- outline-offset: -5px;
- outline: 3px solid #f0f0f080;
- padding: 15px 0;
  min-width: 55vw !important;
+ outline: 3px solid #f0f0f080;
+ padding: 0;
  width: 440px !important;
 }
 .--components-menu--container > input {
- background-color: transparent;
+ background-color: #40404080;
  border: none;
  box-sizing: border-box;
  color: inherit;
@@ -274,7 +273,7 @@ body > main > .--components-view.--minimized {
  flex-shrink: 0;
  gap: 4px;
  padding: 16px 4px;
- width: 24px;
+ width: 25px;
 }
 .--components-view--control > button {
  box-sizing: border-box;
@@ -349,7 +348,7 @@ body > main > .--components-view.--minimized {
  color: #ffffff;
  padding: 10px;
 }
-.--component-explorer-form > button {
+.--component-explorer-form > div > button {
  background-color: #80808080;
  border: 2px solid #40404040;
  color: #ffffff;

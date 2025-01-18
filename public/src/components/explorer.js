@@ -37,6 +37,7 @@ function explorerInterface(onCreateNewItem, connectionValue) {
   console.log('onChangeKey', key, '=', value)
   itemForm.submitButton.textContent =
    value !== null ? 'Update entry' : 'Create entry'
+  itemForm.deleteButton.disabled = value === null
   filterDisplayList(key, value)
   itemForm.valueInput.style.height =
    localStorage.getItem(`[explorer]height:${key}`) ?? '100px'
@@ -101,12 +102,21 @@ function explorerNewItemForm(
  initialKey,
  onChangeKey
 ) {
+ const deleteButton = document.createElement('button')
+ deleteButton.textContent = 'Delete'
+ deleteButton.disabled = true
+ deleteButton.addEventListener('click', function (event) {
+  event.preventDefault()
+  connectionValue.removeItem(keyInput.value)
+  onChangeKey(keyInput.value, null)
+ })
  const submitButton = document.createElement('button')
  const formElement = document.createElement('form')
  formElement.classList.add('--component-explorer-form')
  formElement.addEventListener('submit', async function (e) {
   e.preventDefault()
   submitButton.setAttribute('disabled', 'disabled')
+  deleteButton.disabled = true
   try {
    const formData = {
     key: keyInput.value,
@@ -116,8 +126,10 @@ function explorerNewItemForm(
   } catch (error) {
    console.error('Failed to update entry:', formData)
    console.error(error)
+  } finally {
+   submitButton.removeAttribute('disabled')
+   delete deleteButton.disabled
   }
-  submitButton.removeAttribute('disabled')
  })
  const keyInput = document.createElement('input')
  keyInput.setAttribute('name', 'key')
@@ -143,8 +155,18 @@ function explorerNewItemForm(
  })
  formElement.appendChild(keyInput)
  formElement.appendChild(valueInput)
- formElement.appendChild(submitButton)
+ const buttonContainer = document.createElement('div')
+ formElement.appendChild(buttonContainer)
+ Object.assign(buttonContainer.style, {
+  display: 'flex',
+  flexDirection: 'row',
+  gap: '15px',
+ })
+ buttonContainer.appendChild(submitButton)
+ buttonContainer.appendChild(deleteButton)
  return {
+  buttonContainer,
+  deleteButton,
   element: formElement,
   keyInput,
   onChangeKey,
