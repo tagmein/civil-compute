@@ -41,8 +41,12 @@ function explorerInterface(onCreateNewItem, connectionValue) {
   itemForm.valueInput.style.height =
    localStorage.getItem(`[explorer]height:${key}`) ?? '100px'
   itemForm.valueInput.value = value ?? ''
+  connectionValue.setItem('[explorer]recentKey', key)
  }
- const initialKey = Object.keys(connectionValue)[0] ?? ''
+ const initialKey =
+  connectionValue.getItem('[explorer]recentKey') ??
+  Object.keys(connectionValue)[0] ??
+  ''
  const itemForm = explorerNewItemForm(
   connectionValue,
   onCreateNewItem,
