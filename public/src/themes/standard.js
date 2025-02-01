@@ -299,36 +299,46 @@ body > main > .--components-view.--minimized {
  background-color: #00c000;
 }
 .--components-view--tray {
- position: fixed;
- bottom: 0;
- left: 24px;
- right: 24px;
- border-top-left-radius: 24px;
- border-top-right-radius: 24px;
- height: 64px;
- box-sizing: border-box;
- border: 1px solid #808080;
  background-color: #404040;
  border-bottom: none;
+ border-top-left-radius: 24px;
+ border-top-right-radius: 24px;
+ border: 1px solid #808080;
+ bottom: 0;
  box-shadow: 0 0 64px #ffffff40;
+ box-sizing: border-box;
  gap: 8px;
+ height: 64px;
+ left: 24px;
+ mix-blend-mode: difference;
  padding: 8px;
+ pointer-events: none;
+ position: fixed;
+ right: 24px;
  z-index: 1000000;
 }
 .--components-view--tray > div {
- border: 1px solid #808080;
- background-color: #a0a0a0;
- height: 48px;
- min-width: 48px;
- max-width: 240px;
- flex-shrink: 0;
- flex-grow: 1;
- border-radius: 16px;
- display: grid;
  align-items: center;
+ background-color: #a0a0a0;
+ border-radius: 16px;
+ border: 1px solid #808080;
+ cursor: pointer;
+ display: grid;
+ flex-grow: 1;
+ flex-shrink: 0;
+ height: 48px;
  justify-content: center;
- text-overflow: ellipsis;
+ max-width: 240px;
+ min-width: 48px;
  overflow: hidden;
+ pointer-events: all;
+ text-overflow: ellipsis;
+}
+.--components-view--tray > div:hover {
+ box-shadow: inset 0 0 24px 8px #ffffff;
+}
+.--components-view--tray > div:active {
+ box-shadow: inset 0 0 24px 8px #808080;
 }
 .--components-commander {
  width: 100%;

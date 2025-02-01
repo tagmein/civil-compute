@@ -71,10 +71,6 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
    )
    const content = contentClass.createElement('main', {
     tabindex: '0',
-    style: `
-     overflow-x: auto;
-     overflow-y: hidden;
-    `,
    })
    parentElement.appendChild(content)
    const root = {
