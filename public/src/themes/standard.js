@@ -298,6 +298,14 @@ body > main > .--components-view.--minimized {
 .--components-view--control--Zoom {
  background-color: #00c000;
 }
+.--components-view--control--Sustain {
+ background-color: #4040c0;
+}
+.--sustained > .--components-view--control > .--components-view--control--Sustain {
+ background-color: #a0a0ff;
+ box-shadow: inset 0 0 2px 2px #4040c0;
+}
+
 .--components-view--tray {
  background-color: #404040;
  border-bottom: none;

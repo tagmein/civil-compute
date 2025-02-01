@@ -55,6 +55,13 @@ globalThis.LOAD['components/view'].resolve(async function ({ load }) {
     element.classList.add('--maximized')
    }
   })
+  button('Sustain', function () {
+   if (element.classList.contains('--sustained')) {
+    element.classList.remove('--sustained')
+   } else {
+    element.classList.add('--sustained')
+   }
+  })
   element.appendChild(control)
   element.appendChild(incomingElement ?? a)
   if (options.scrollIntoView) {
