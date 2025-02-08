@@ -1,10 +1,18 @@
 globalThis.LOAD['components/menu'].resolve(async function ({ load }) {
  const components = {
-  commander: await load('commander')
+  commander: await load('commander'),
  }
  console.log({ components })
  let menuCount = 0
- return ({ a, b, classNames, components: rootComponents, items, options, getMenu }) => {
+ return ({
+  a,
+  b,
+  classNames,
+  components: rootComponents,
+  items,
+  options,
+  getMenu,
+ }) => {
   const element = document.createElement('section')
   element.dataset.name = 'menu'
   if (classNames?.container) {
@@ -22,12 +30,11 @@ globalThis.LOAD['components/menu'].resolve(async function ({ load }) {
   if (b) {
    element.appendChild(b)
   }
-  const commander = options?.commander === false
-   ? undefined
-   : components.commander()
+  const commander =
+   options?.commander === false ? undefined : components.commander()
   for (const [name, action, itemOptions = {}] of items ?? []) {
-   if (typeof name === 'string') {}
-   else if (typeof name !== 'undefined') {
+   if (typeof name === 'string') {
+   } else if (typeof name !== 'undefined') {
     if (name instanceof HTMLElement) {
      element.appendChild(name)
      continue
@@ -54,7 +61,12 @@ globalThis.LOAD['components/menu'].resolve(async function ({ load }) {
   }
   if (commander) {
    element.appendChild(commander.element)
-   element.addEventListener('click', () => commander.element.focus())
+   element.addEventListener('click', (e) => {
+    console.log(e.target.tagName)
+    if (e.target.tagName !== 'INPUT') {
+     commander.element.focus()
+    }
+   })
   }
   return { element }
  }
