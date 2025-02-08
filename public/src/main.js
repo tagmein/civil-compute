@@ -1,4 +1,5 @@
 globalThis.LOAD['main'].resolve(async function ({ load }) {
+ const httpKV = await load('modules/civil-memory/kv/httpKV.mjs')
  const store = (await load('store'))(localStorage)
  const civil = await load('civil')
  const library = await load('library')
@@ -137,8 +138,8 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
 
    const connectLocalStorage = [
     'Local Storage',
-    function (menu) {
-     const explorerInstance = components.explorer({
+    async function (menu) {
+     const explorerInstance = await components.explorer({
       connection: { name: 'Local Storage', value: localStorage },
       components,
       getMenu() {
@@ -167,8 +168,154 @@ globalThis.LOAD['main'].resolve(async function ({ load }) {
     },
    ]
 
+   const connectKeyValueStorage = [
+    'Key Value Store',
+    async function (menu) {
+     let modeInput = null
+     let keyValueBaseUrlInput = null
+     async function tryConnectToKeyValueStore() {
+      const baseUrl =
+       keyValueBaseUrlInput.value +
+       (modeInput?.value ? `?mode=${modeInput.value}` : '')
+      const kv = httpKV({ baseUrl })
+
+      const explorerInstance = await components.explorer({
+       connection: { name: `Key Value Store: ${baseUrl}`, value: kv },
+       components,
+       getMenu() {
+        return g
+       },
+      })
+
+      if (explorerInstance.error) {
+       const paramModeErrorMessage =
+        'HTTP 400: Bad Request: parameter mode must be one of: '
+       if (explorerInstance.error.includes(paramModeErrorMessage)) {
+        const modes = explorerInstance.error
+         .split(paramModeErrorMessage)[1]
+         .split(', ')
+        const modeSelectContainer = document.createElement('div')
+        const modeSelectLabel = document.createElement('label')
+        modeSelectLabel.textContent = 'Mode'
+        const modeSelect = document.createElement('select')
+        modeInput = modeSelect
+        modeSelect.style.width = '100%'
+        modeSelect.style.padding = '4px'
+        modeSelect.style.marginBottom = '8px'
+        modeSelect.style.border = '1px solid #ccc'
+        modeSelect.style.borderRadius = '5px'
+        for (const mode of modes) {
+         const option = document.createElement('option')
+         option.value = mode
+         option.textContent = mode
+         modeSelect.appendChild(option)
+        }
+
+        const modeSelectConnectButton = document.createElement('button')
+        modeSelectConnectButton.textContent = 'Set Mode'
+        modeSelectConnectButton.style.padding = '4px 8px'
+        modeSelectConnectButton.style.marginLeft = '8px'
+        modeSelectConnectButton.addEventListener(
+         'click',
+         tryConnectToKeyValueStore
+        )
+
+        modeSelectLabel.appendChild(modeSelect)
+        modeSelectContainer.appendChild(modeSelectLabel)
+        modeSelectContainer.appendChild(modeSelectConnectButton)
+        modeSelectContainer.style.alignItems = 'center'
+        modeSelectContainer.style.backgroundColor = '#f0f0f040'
+        modeSelectContainer.style.border = '1px solid #cccccc80'
+        modeSelectContainer.style.borderRadius = '5px'
+        modeSelectContainer.style.display = 'flex'
+        modeSelectContainer.style.fontFamily = 'monospace'
+        modeSelectContainer.style.justifyContent = 'center'
+        modeSelectContainer.style.margin = '10px'
+        modeSelectContainer.style.padding = '10px'
+
+        const modeSelectView = v({ element: modeSelectContainer }).element
+        menu.element.appendChild(modeSelectView)
+       } else {
+        const errorView = v(components.text(explorerInstance.error)).element
+        errorView.style.backgroundColor = '#f0f0f040'
+        errorView.style.border = '1px solid #cccccc80'
+        errorView.style.borderRadius = '5px'
+        errorView.style.color = '#333'
+        errorView.style.fontFamily = 'monospace'
+        errorView.style.margin = '10px'
+        errorView.style.padding = '10px'
+        menu.element.appendChild(errorView)
+       }
+       return
+      }
+
+      const commanderElement = components.commander({
+       connection: { name: 'Key Value Store', value: kv },
+       components,
+       getMenu() {
+        return g
+       },
+      }).element
+
+      const a = components.menu({
+       components,
+       options: {
+        commander: false,
+       },
+       items: [[explorerInstance.element], [commanderElement]],
+       getMenu() {
+        return a
+       },
+      })
+
+      menu.element.parentElement.appendChild(v(a).element)
+      autoScroll(explorerInstance.element)
+     }
+
+     async function keyValueConfiguration() {
+      try {
+       const container = document.createElement('div')
+       const input = document.createElement('input')
+       keyValueBaseUrlInput = input
+       input.type = 'text'
+       input.value = 'http://localhost:3333'
+       input.style.width = '100%'
+       input.style.padding = '4px'
+       input.style.marginBottom = '8px'
+
+       const button = document.createElement('button')
+       button.textContent = 'Connect'
+       button.style.padding = '4px 8px'
+
+       button.onclick = tryConnectToKeyValueStore
+
+       container.appendChild(input)
+       container.appendChild(button)
+       return container
+      } catch (e) {
+       console.error(e)
+       return components.text(`Error: ${e.message ?? e ?? 'Unknown error'}`)
+        .element
+      }
+     }
+
+     const configPane = components.doc({
+      components,
+      items: [[await keyValueConfiguration(), undefined, 'URL']],
+      name: 'Configure Key Value Store',
+      onClose() {
+       configView.close()
+      },
+     })
+
+     const configView = v(configPane)
+     menu.element.appendChild(configView.element)
+     autoScroll(content)
+    },
+   ]
+
    const connectMenu = {
-    items: [connectLocalStorage],
+    items: [connectLocalStorage, connectKeyValueStorage],
    }
 
    const connectTo = [

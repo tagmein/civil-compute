@@ -129,7 +129,7 @@ globalThis.LOAD['themes/standard'].resolve(async function ({}) {
   max-height: 100vh;
   min-width: 528px;
   overflow: auto;
-  padding: 0 20px 5em;
+  padding: 0 20px;
 }
 .--components-doc--container > label {
   background-color: #80808080;

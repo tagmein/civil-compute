@@ -25,7 +25,11 @@ const LOAD = (globalThis.LOAD = {}),
     })
    )
    const script = document.createElement('script')
-   script.setAttribute('src', `${rootUrl}${urlPath}.js`)
+   const urlPathHasExtension = urlPath.split('/').pop().includes('.')
+   script.setAttribute(
+    'src',
+    `${rootUrl}${urlPath}${urlPathHasExtension ? '' : '.js'}`
+   )
    document.body.appendChild(script)
    return resource.promise
   })

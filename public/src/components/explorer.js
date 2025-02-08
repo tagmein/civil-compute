@@ -1,99 +1,192 @@
 globalThis.LOAD['components/explorer'].resolve(async function ({ load }) {
- return (
+ return async (
   { connection: { name: connectionName, value: connectionValue } } = {
    connection: { name: 'None', value: undefined },
   }
  ) => {
+  // we want to handle multiple types of connectionValue
+  // 1. localStorage
+  // 2. httpKV
+  // 3. other
+  const unifiedConnectionValue = {
+   async setItem(key, value) {
+    try {
+     if ('set' in connectionValue) {
+      return await connectionValue.set(key, value)
+     }
+     return await connectionValue.setItem(key, value)
+    } catch (error) {
+     console.error('Failed to set item:', error)
+     return false
+    }
+   },
+   async getItem(key) {
+    try {
+     if ('get' in connectionValue) {
+      return await connectionValue.get(key)
+     }
+     return await connectionValue.getItem(key)
+    } catch (error) {
+     console.warn('Failed to get item:', error)
+     throw error
+    }
+   },
+   async removeItem(key) {
+    try {
+     if ('remove' in connectionValue) {
+      return await connectionValue.remove(key)
+     }
+     if ('delete' in connectionValue) {
+      return await connectionValue.delete(key)
+     }
+     return await connectionValue.removeItem(key)
+    } catch (error) {
+     console.error('Failed to remove item:', error)
+     return false
+    }
+   },
+   async keys() {
+    try {
+     if ('keys' in connectionValue) {
+      return await connectionValue.keys()
+     }
+     return Object.keys(connectionValue)
+    } catch (error) {
+     console.error('Failed to get keys:', error)
+     return []
+    }
+   },
+   async clear() {
+    try {
+     if ('clear' in connectionValue) {
+      return await connectionValue.clear()
+     }
+     return await Promise.all(
+      Object.keys(connectionValue).map((key) => connectionValue.removeItem(key))
+     ).length
+    } catch (error) {
+     console.error('Failed to clear:', error)
+     return false
+    }
+   },
+   async length() {
+    try {
+     if ('length' in connectionValue) {
+      return await connectionValue.length()
+     }
+     return Object.keys(connectionValue).length
+    } catch (error) {
+     console.error('Failed to get length:', error)
+     return 0
+    }
+   },
+  }
   const element = document.createElement('section')
   element.classList.add('--components-commander')
   element.setAttribute('placeholder', 'Search')
   console.log({ connectionName, connectionValue })
-  const count =
-   typeof connectionValue === 'undefined'
-    ? NaN
-    : Object.keys(connectionValue).length
+  const count = (await unifiedConnectionValue.keys()).length
   const label = document.createElement('label')
   Object.assign(label.style, { padding: '15px' })
-  label.textContent =
-   typeof connectionValue === 'undefined'
-    ? 'No connection'
-    : `Connected to ${connectionName} with ${count} item${
-       count === 1 ? '' : 's'
-      }`
+  label.textContent = `Connected to ${connectionName} with ${count} item${
+   count === 1 ? '' : 's'
+  }`
   element.appendChild(label)
-  function onCreateNewItem({ key, value }) {
-   connectionValue.setItem(key, value)
+  async function onCreateNewItem({ key, value }) {
+   await unifiedConnectionValue.setItem(key, value)
    console.log(`Updated ${JSON.stringify(key)} to:`, value)
-   explorerInstance.onChangeKey(key, value)
+   await explorerInstance.onChangeKey(key, value)
   }
-  const explorerInstance = explorerInterface(onCreateNewItem, connectionValue)
+  const explorerInstance = await explorerInterface(
+   onCreateNewItem,
+   unifiedConnectionValue
+  )
   element.appendChild(explorerInstance.element)
-  return { element: numberedPane(element).element }
+  return {
+   element: numberedPane(element).element,
+   error: explorerInstance.error,
+  }
  }
 })
 
-function explorerInterface(onCreateNewItem, connectionValue) {
- function onChangeKey(key, value) {
-  console.log('onChangeKey', key, '=', value)
-  itemForm.submitButton.textContent =
-   value !== null ? 'Update entry' : 'Create entry'
-  itemForm.deleteButton.disabled = value === null
-  filterDisplayList(key, value)
-  itemForm.valueInput.style.height =
-   localStorage.getItem(`[explorer]height:${key}`) ?? '100px'
-  itemForm.valueInput.value = value ?? ''
-  connectionValue.setItem('[explorer]recentKey', key)
- }
- const initialKey =
-  connectionValue.getItem('[explorer]recentKey') ??
-  Object.keys(connectionValue)[0] ??
-  ''
- const itemForm = explorerNewItemForm(
-  connectionValue,
-  onCreateNewItem,
-  initialKey,
-  onChangeKey
- )
- const containerElement = document.createElement('div')
- containerElement.appendChild(itemForm.element)
- const listElement = document.createElement('div')
+async function explorerInterface(onCreateNewItem, connectionValue) {
+ try {
+  const initialKey =
+   (await connectionValue.getItem('[explorer]recentKey')) ??
+   (await connectionValue.getItem((await connectionValue.keys())[0] ?? ''))
+  async function onChangeKey(key, value) {
+   console.log('onChangeKey', key, '=', value)
+   itemForm.submitButton.textContent =
+    value !== null ? 'Update entry' : 'Create entry'
+   itemForm.deleteButton.disabled = value === null
+   await filterDisplayList(key, value)
+   itemForm.valueInput.style.height =
+    localStorage.getItem(`[explorer]height:${key}`) ?? '100px'
+   itemForm.valueInput.value = value ?? ''
+   await connectionValue.setItem('[explorer]recentKey', key)
+  }
+  const itemForm = explorerNewItemForm(
+   connectionValue,
+   onCreateNewItem,
+   initialKey,
+   onChangeKey
+  )
+  const containerElement = document.createElement('div')
+  containerElement.appendChild(itemForm.element)
+  const listElement = document.createElement('div')
 
- function filterDisplayList(key, value) {
-  listElement.innerHTML = ''
-  if (connectionValue) {
-   for (const [k, v] of Object.entries(connectionValue)) {
-    if (!k.toLowerCase().includes(key.toLowerCase())) {
-     continue
+  async function filterDisplayList(key, value) {
+   listElement.innerHTML = ''
+   if (connectionValue) {
+    for (const k of await connectionValue.keys()) {
+     if (!k.toLowerCase().includes(key.toLowerCase())) {
+      continue
+     }
+     const v = await connectionValue.getItem(k)
+     const listItemElement = document.createElement('div')
+     listItemElement.addEventListener('click', async function () {
+      itemForm.keyInput.value = k
+      itemForm.valueInput.value = v
+      await itemForm.onChangeKey(k, v)
+      console.log('loaded', k, v)
+     })
+     Object.assign(listItemElement.style, {
+      cursor: 'pointer',
+      padding: '15px',
+     })
+     const keyLabel = document.createElement('label')
+     keyLabel.textContent = k
+     const valueSlice = String(v).slice(0, 100)
+     const valueElement = document.createElement('div')
+     Object.assign(valueElement.style, {
+      borderLeft: '15px solid #40404040',
+      paddingLeft: '5px',
+     })
+     valueElement.textContent = valueSlice
+     listItemElement.appendChild(keyLabel)
+     listItemElement.appendChild(valueElement)
+     listElement.appendChild(listItemElement)
     }
-    const listItemElement = document.createElement('div')
-    listItemElement.addEventListener('click', function () {
-     itemForm.keyInput.value = k
-     itemForm.valueInput.value = v
-     itemForm.onChangeKey(k, v)
-    })
-    Object.assign(listItemElement.style, {
-     cursor: 'pointer',
-     padding: '15px',
-    })
-    const keyLabel = document.createElement('label')
-    keyLabel.textContent = k
-    const valueSlice = String(v).slice(0, 100)
-    const valueElement = document.createElement('div')
-    Object.assign(valueElement.style, {
-     borderLeft: '15px solid #40404040',
-     paddingLeft: '5px',
-    })
-    valueElement.textContent = valueSlice
-    listItemElement.appendChild(keyLabel)
-    listItemElement.appendChild(valueElement)
-    listElement.appendChild(listItemElement)
+    containerElement.appendChild(listElement)
    }
-   containerElement.appendChild(listElement)
+  }
+  // Set the initial key
+  await onChangeKey(initialKey, await connectionValue.getItem(initialKey))
+  return { element: containerElement, onChangeKey, error: undefined }
+ } catch (e) {
+  const notice = document.createElement('div')
+  notice.textContent = 'Failed to get item:'
+  const pre = document.createElement('pre')
+  pre.textContent = e.message ?? e ?? 'Unknown error'
+  notice.appendChild(pre)
+  return {
+   element: notice,
+   onChangeKey: async function () {
+    throw e
+   },
+   error: e.message ?? e ?? 'Unknown error',
   }
  }
- // Set the initial key
- onChangeKey(initialKey, connectionValue.getItem(initialKey))
- return { element: containerElement, onChangeKey }
 }
 
 function explorerNewItemForm(
@@ -105,9 +198,9 @@ function explorerNewItemForm(
  const deleteButton = document.createElement('button')
  deleteButton.textContent = 'Delete'
  deleteButton.disabled = true
- deleteButton.addEventListener('click', function (event) {
+ deleteButton.addEventListener('click', async function (event) {
   event.preventDefault()
-  connectionValue.removeItem(keyInput.value)
+  await connectionValue.removeItem(keyInput.value)
   onChangeKey(keyInput.value, null)
  })
  const submitButton = document.createElement('button')
@@ -117,11 +210,11 @@ function explorerNewItemForm(
   e.preventDefault()
   submitButton.setAttribute('disabled', 'disabled')
   deleteButton.disabled = true
+  const formData = {
+   key: keyInput.value,
+   value: valueInput.value,
+  }
   try {
-   const formData = {
-    key: keyInput.value,
-    value: valueInput.value,
-   }
    await onSubmit(formData)
   } catch (error) {
    console.error('Failed to update entry:', formData)
@@ -138,9 +231,9 @@ function explorerNewItemForm(
  keyInput.value = initialKey
  const events = ['blur', 'change', 'focus', 'input', 'key', 'keyup', 'paste']
  for (const event of events) {
-  keyInput.addEventListener(event, function () {
-   const value = connectionValue.getItem(keyInput.value)
-   onChangeKey(keyInput.value, value)
+  keyInput.addEventListener(event, async function () {
+   const value = await connectionValue.getItem(keyInput.value)
+   await onChangeKey(keyInput.value, value)
   })
  }
  const valueInput = document.createElement('textarea')
