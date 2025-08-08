@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <script>
+      globalThis.initTimestamp = Date.now();
+    </script>
+    <title>Civil Compute</title>
+    <style>
+      :root {
+        --BorderColor: #ffffff3f;
+        --MenuHeight: 32px;
+      }
+      body {
+        background-color: #7f7f7f;
+        margin: 0;
+        padding: 0;
+      }
+      .content {
+        background-color: #ffffff7f;
+        flex-grow: 1;
+      }
+      .content > *::after,
+      .content > *::before {
+        background-color: transparent;
+        content: "";
+        display: block;
+        height: 1px;
+        margin-top: -1px;
+        width: 100%;
+      }
+      .content p {
+        margin-bottom: 0;
+      }
+      .stack,
+      .group {
+        display: flex;
+      }
+      .stack {
+        flex-direction: column;
+        width: 100%;
+      }
+      .group {
+        flex-direction: row;
+        height: 100%;
+      }
+      .space {
+        flex-grow: 1;
+      }
+      .menu {
+        border-bottom: 1px solid var(--BorderColor);
+        height: var(--MenuHeight);
+      }
+      .menu .button {
+        height: 100%;
+      }
+      .menu .button.active {
+        filter: invert(1);
+      }
+      .menu .button,
+      .tray .button {
+        padding: 4px 8px;
+        text-align: left;
+      }
+      .tray {
+        position: absolute;
+      }
+      .timestamp {
+        color: light-dark(#7f7f7f7f. #0000007f);
+        font-size: 80%;
+        padding: 16px;
+        text-align: center;
+      }
+      .about {
+        background-color: #ffffff7f;
+        box-sizing: border-box;
+        min-height: 100%;
+        padding: 0 16px;
+      }
+      a {
+        border-bottom: 2px solid;
+        color: light-dark(#aaccee, #907050);
+        cursor: pointer;
+        font-size: 90%;
+        font-weight: bold;
+        letter-spacing: 0.125px;
+        margin: 0 4px;
+        padding-bottom: 1px;
+      }
+      a:hover {
+        color: #a78767;
+        text-shadow: 0 0 8px #a78767;
+      }
+      a:active {
+        text-shadow: 0 0 8px #fff, 0 0 4px #fff, 0 0 2px #fff, 0 0 1px #fff,
+          1px 1px 4px #000, -1px -1px 4px #000, -1px 1px 4px #000,
+          1px -1px 4px #000;
+      }
+      *::selection,
+      *::selection * {
+        background-color: #000 !important;
+        color: #fff !important;
+      }
+      th,
+      td {
+        border-color: transparent;
+        border-style: solid;
+        border-width: 0 12px 0 12px;
+        padding: 4px;
+      }
+      thead > tr > th {
+        border-bottom: 1px solid;
+        text-align: left;
+      }
+      tr:hover {
+        background-color: #0000001f;
+      }
+      .tabs {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        text-wrap: nowrap;
+        white-space: nowrap;
+      }
+      .tabs > * {
+        margin-right: 8px;
+      }
+      .tabs-content {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+      .tabs button {
+        max-width: 140px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+      article, article > section {
+       border: 1px solid #0000007f;
+       box-shadow: inset 0 0 1px 1px #ffffff7f;
+       box-sizing: border-box;
+       display: flex;
+       flex-direction: column;
+       gap: 15px;
+       background-color: #7f7f7f3f;
+       border-radius: 15px;
+       padding: 15px;
+       margin: 0;
+       min-width: 480px;
+      }
+      button, select {
+       background-color: light-dark(#2f2f2f, #afafaf);
+       border: 1px solid #7f7f7f;
+       padding: 2px 4px;
+       margin: 0;
+       color: light-dark(#fff, #000);
+      }
+      button:hover, select:hover {
+        background-color: light-dark(#3f3f3f, #9f9f9f);
+      }
+      article section > * {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="/main.js"></script>
+  </body>
+</html>

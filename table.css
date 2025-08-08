@@ -1,0 +1,13 @@
+.table--pin {
+ filter: grayscale(1);
+ opacity: 0.5;
+}
+
+.table--pin--button:hover .table--pin {
+ filter: grayscale(0);
+}
+
+.table--pin.pinned {
+ opacity: 1;
+}
+

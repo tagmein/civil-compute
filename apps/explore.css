@@ -1,0 +1,9 @@
+.app-explore {
+  background-color: light-dark(#000000df, #ffffffaf);
+  color: light-dark(#ffffff, #000000);
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 16px;
+  max-height: 100%;
+  overflow: auto;
+}
