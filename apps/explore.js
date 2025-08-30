@@ -16,68 +16,75 @@ registerComponent(
       const table = tableComponent({ ...components });
       return async function (activeConnection) {
         function toHtml(text) {
-          return text.replace(/\"/g, "&dquo;")
+          return text.replace(/\"/g, "&dquo;");
         }
         async function openItem(name) {
-          openSet = [...openSet, name]
+          openSet = [...openSet, name];
           async function onTabClose() {
-            openSet = openSet.filter(x => x !== name)
-            await saveLastSet()
+            openSet = openSet.filter((x) => x !== name);
+            await saveLastSet();
           }
-          await saveLastSet()
+          await saveLastSet();
           const fullValue = await activeConnection.getItem(name);
           async function onTabClick() {
             const element = itemTools.element.parentElement;
             element.scrollIntoView({ behavior: "smooth", block: "center" });
             element.style.boxShadow = "inset 0 0 4px 4px #ff0";
-            await (new Promise(r => setTimeout(r, 140)));
+            await new Promise((r) => setTimeout(r, 140));
             element.style.boxShadow = "inset 0 0 4px 4px #fe0";
-            await (new Promise(r => setTimeout(r, 130)));
+            await new Promise((r) => setTimeout(r, 130));
             element.style.boxShadow = "inset 0 0 4px 4px #fd0";
-            await (new Promise(r => setTimeout(r, 120)));
+            await new Promise((r) => setTimeout(r, 120));
             element.style.boxShadow = "inset 0 0 4px 4px #fc0";
-            await (new Promise(r => setTimeout(r, 110)));
+            await new Promise((r) => setTimeout(r, 110));
             element.style.boxShadow = "inset 0 0 4px 4px #fb0";
-            await (new Promise(r => setTimeout(r, 100)));
+            await new Promise((r) => setTimeout(r, 100));
             element.style.boxShadow = "inset 0 0 4px 4px #fa0";
-            await (new Promise(r => setTimeout(r, 1000)));
+            await new Promise((r) => setTimeout(r, 1000));
             element.style.boxShadow = "";
           }
-          const itemTools = toolbarRef
-            .tab(JSON.stringify(name), onTabClose, onTabClick)
-            .printer.html
-              `
+          const itemTools = toolbarRef.tab(
+            JSON.stringify(name),
+            onTabClose,
+            onTabClick
+          ).printer.html`
                 <h3>View item</h3>
                 <h4>${toHtml(JSON.stringify(name))}</h4>
                 <section style="word-wrap: anywhere; white-space: preserve;">${fullValue}</section>
-              `
-            ;
+              `;
           await components.notes(
             activeConnection,
             "!explore.notes",
             name,
-            itemTools.tab('Notes').element
+            itemTools.tab("Notes").element
           );
         }
-        let showSystemEntries = false
-        let openSet = []
-        let openLastSet = (await activeConnection.getItem('!explore.openLastSet')) === 'open'
+        let showSystemEntries = false;
+        let openSet = [];
+        let openLastSet =
+          (await activeConnection.getItem("!explore.openLastSet")) === "open";
         async function saveLastSet() {
           if (openLastSet) {
-            await activeConnection.setItem('!explore.lastSet', JSON.stringify(openSet))
-          }
-          else {
-            await activeConnection.removeItem('!explore.lastSet')
+            await activeConnection.setItem(
+              "!explore.lastSet",
+              JSON.stringify(openSet)
+            );
+          } else {
+            await activeConnection.removeItem("!explore.lastSet");
           }
         }
         function itemFilter(item) {
           if (!showSystemEntries) {
-            return !item.name.startsWith('!explore.')
+            return !item.name.startsWith("!explore.");
           }
-          return true
+          return true;
         }
         let lastItemTableElement;
-        let activeKeys = Object.keys(activeConnection);
+        let activeKeys =
+          "keys" in activeConnection &&
+          typeof activeConnection.keys === "function"
+            ? await activeConnection.keys()
+            : Object.keys(activeConnection);
         const element = doc.createElement("section");
         element.classList.add("app-explore");
         const printer = components.printer(element);
@@ -97,34 +104,42 @@ registerComponent(
         toolbarRef.element.appendChild(
           components.select({
             async action(what) {
-              showSystemEntries = what === "show"
+              showSystemEntries = what === "show";
               await reloadView();
             },
             options: [
               { value: "show", textContent: "Show system entries" },
-              { value: "hide", textContent: "Do not show system entries" }
+              { value: "hide", textContent: "Do not show system entries" },
             ],
-            selectedOption: showSystemEntries ? "show" : "hide"
+            selectedOption: showSystemEntries ? "show" : "hide",
           }).element
-        )
+        );
         toolbarRef.element.appendChild(
           components.select({
             async action(what) {
-              openLastSet = what === "open"
-              await activeConnection.setItem('!explore.openLastSet', what)
-              await saveLastSet()
+              openLastSet = what === "open";
+              await activeConnection.setItem("!explore.openLastSet", what);
+              await saveLastSet();
             },
             options: [
-              { value: "open", textContent: "Open last opened entries on startup" },
-              { value: "none", textContent: "No entries open on startup" }
+              {
+                value: "open",
+                textContent: "Open last opened entries on startup",
+              },
+              { value: "none", textContent: "No entries open on startup" },
             ],
-            selectedOption: openLastSet ? "open" : "none"
+            selectedOption: openLastSet ? "open" : "none",
           }).element
-        )
+        );
         const actions = ["", "view", "edit", "copy", "delete"];
         const columns = [
-         "!table:star", "name", "size", "type", "value",
-         "!table:action", "!table:pin"
+          "!table:star",
+          "name",
+          "size",
+          "type",
+          "value",
+          "!table:action",
+          "!table:pin",
         ];
         async function onAction(item, e) {
           const value = e.target.value;
@@ -174,7 +189,9 @@ registerComponent(
                 }
               }
               const editTab = toolbarRef.tab("Edit item");
-              editTab.printer.text(`Edit item ${toHtml(JSON.stringify(item.name))}`);
+              editTab.printer.text(
+                `Edit item ${toHtml(JSON.stringify(item.name))}`
+              );
               const { element } = editTab.printer.html`
                 <form onsubmit=${submitEdit}>
                   <textarea name="value" value=${item.value} onkeyup=${handleChange} onchange=${handleChange} />
@@ -196,19 +213,28 @@ registerComponent(
           e.target.value = "";
         }
         async function itemIsPinned(item, pinType) {
-          return activeConnection.getItem(`!explore.${pinType === "pin" ? "pinned" : "pin:" + pinType}:${item.name}`);
+          return activeConnection.getItem(
+            `!explore.${pinType === "pin" ? "pinned" : "pin:" + pinType}:${
+              item.name
+            }`
+          );
         }
         async function itemSetPinned(item, pinned, pinType) {
-          const key = `!explore.${pinType === "pin" ? "pinned" : "pin:" + pinType}:${item.name}`
+          const key = `!explore.${
+            pinType === "pin" ? "pinned" : "pin:" + pinType
+          }:${item.name}`;
           if (pinned) {
-            return activeConnection.setItem(key, '1');
-          }
-          else {
+            return activeConnection.setItem(key, "1");
+          } else {
             return activeConnection.removeItem(key);
           }
         }
         async function reloadView() {
-          activeKeys = Object.keys(activeConnection);
+          activeKeys =
+            "keys" in activeConnection &&
+            typeof activeConnection.keys === "function"
+              ? await activeConnection.keys()
+              : Object.keys(activeConnection);
           const itemTable = await table(
             activeConnection,
             activeKeys,
@@ -232,7 +258,9 @@ registerComponent(
           reloadView
         );
         if (openLastSet) {
-          const lastSet = JSON.parse(await activeConnection.getItem('!explore.lastSet') ?? '[]')
+          const lastSet = JSON.parse(
+            (await activeConnection.getItem("!explore.lastSet")) ?? "[]"
+          );
           for (const item of lastSet) {
             await openItem(item);
           }

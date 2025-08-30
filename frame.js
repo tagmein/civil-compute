@@ -32,6 +32,10 @@ registerComponent(
         textContent: "Connection",
         options: [
           {
+            textContent: "Disk",
+            value: "disk",
+          },
+          {
             textContent: "Local Storage",
             value: "localStorage",
           },

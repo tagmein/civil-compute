@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8"/>
+    <meta charset="utf-8" />
     <script>
       globalThis.initTimestamp = Date.now();
     </script>
@@ -66,7 +66,7 @@
         position: absolute;
       }
       .timestamp {
-        color: light-dark(#7f7f7f7f. #0000007f);
+        color: light-dark(#7f7f7f7f, #0000007f);
         font-size: 80%;
         padding: 16px;
         text-align: center;
@@ -138,27 +138,30 @@
         text-overflow: ellipsis;
         overflow: hidden;
       }
-      article, article > section {
-       border: 1px solid #0000007f;
-       box-shadow: inset 0 0 1px 1px #ffffff7f;
-       box-sizing: border-box;
-       display: flex;
-       flex-direction: column;
-       gap: 15px;
-       background-color: #7f7f7f3f;
-       border-radius: 15px;
-       padding: 15px;
-       margin: 0;
-       min-width: 480px;
+      article,
+      article > section {
+        border: 1px solid #0000007f;
+        box-shadow: inset 0 0 1px 1px #ffffff7f;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        background-color: #7f7f7f3f;
+        border-radius: 15px;
+        padding: 15px;
+        margin: 0;
+        min-width: 480px;
       }
-      button, select {
-       background-color: light-dark(#2f2f2f, #afafaf);
-       border: 1px solid #7f7f7f;
-       padding: 2px 4px;
-       margin: 0;
-       color: light-dark(#fff, #000);
+      button,
+      select {
+        background-color: light-dark(#2f2f2f, #afafaf);
+        border: 1px solid #7f7f7f;
+        padding: 2px 4px;
+        margin: 0;
+        color: light-dark(#fff, #000);
       }
-      button:hover, select:hover {
+      button:hover,
+      select:hover {
         background-color: light-dark(#3f3f3f, #9f9f9f);
       }
       article section > * {

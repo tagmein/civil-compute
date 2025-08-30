@@ -52,16 +52,23 @@ async function main(doc) {
     delete componentResolvers[key];
     resolve(await component(doc, load));
   };
+  components.httpKV = await components.load(
+    doc,
+    "/httpKV.js",
+    "8dci6lm4kesdkq67 6384hps9qe49dls"
+  );
   components.app = await components.load(
     doc,
     "/app.js",
     "d497f01ca9394a37920ea1004f59093a"
   );
-  components.attachStyleSheet = (await components.load(
-    doc,
-    "/attachStyleSheet.js",
-    "55786c9510744a8385e085ea127ac3a5"
-  ))();
+  components.attachStyleSheet = (
+    await components.load(
+      doc,
+      "/attachStyleSheet.js",
+      "55786c9510744a8385e085ea127ac3a5"
+    )
+  )();
   components.frame = await components.load(
     doc,
     "/frame.js",
@@ -80,12 +87,40 @@ async function main(doc) {
     )
   )({ ...components });
   components.notes = (
-    await components.load(
-      doc,
-      "/notes.js",
-      "91952fa55f7d42fc8f565f071b583d7d"
-    )
+    await components.load(doc, "/notes.js", "91952fa55f7d42fc8f565f071b583d7d")
   )({ ...components });
+  const httpKv = components.httpKV();
+  const diskKV = httpKv({ baseUrl: location.origin + "/?mode=disk" });
+  const disk = (globalThis.disk = {
+    async keys() {
+      const index = await diskKV.get("!explore.index");
+      try {
+        return typeof index === "string" && index.length > 0
+          ? JSON.parse(index)
+          : [];
+      } catch (e) {
+        console.error(e);
+        return ["Error"];
+      }
+    },
+    async getItem(key) {
+      return diskKV.get(key);
+    },
+    async setItem(key, value) {
+      const index = await disk.keys();
+      if (index.indexOf(key) === -1) {
+        await diskKV.set("!explore.index", JSON.stringify(index.concat([key])));
+      }
+      return diskKV.set(key, value);
+    },
+    async removeItem(key) {
+      await diskKV.set(
+        "!explore.index",
+        JSON.stringify((await globalThis.disk.keys()).filter((x) => x !== key))
+      );
+      return diskKV.delete(key);
+    },
+  });
   globalThis.mainFrame = await components.frame({
     ...components,
   });
@@ -112,7 +147,7 @@ async function main(doc) {
             const appManager = components.app(components);
             const preferencesApp = await appManager.load("preferences");
             mainFrame.contentElement.appendChild(
-              preferencesApp(mainFrame.activeConnection).element
+              (await preferencesApp(mainFrame.activeConnection)).element
             );
           };
           await mainFrame.update();
