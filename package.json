@@ -2,8 +2,7 @@
   "name": "@tagmein/civil-compute",
   "version": "0.0.0",
   "scripts": {
-    "start": "node server.mjs",
-    "postinstall": "cp node_modules/@tagmein/civil-memory/dist/kv/httpKV.js ./httpKV.js"
+    "start": "node server.mjs"
   },
   "dependencies": {
     "@tagmein/civil-memory": "^0.0.12"

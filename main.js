@@ -52,11 +52,12 @@ async function main(doc) {
     delete componentResolvers[key];
     resolve(await component(doc, load));
   };
-  components.httpKV = await components.load(
+  const httpKV = await components.load(
     doc,
     "/httpKV.js",
     "8dci6lm4kesdkq67 6384hps9qe49dls"
   );
+  components.httpKV = httpKV();
   components.app = await components.load(
     doc,
     "/app.js",
@@ -89,11 +90,12 @@ async function main(doc) {
   components.notes = (
     await components.load(doc, "/notes.js", "91952fa55f7d42fc8f565f071b583d7d")
   )({ ...components });
-  const httpKv = components.httpKV();
-  const diskKV = httpKv({ baseUrl: location.origin + "/?mode=disk" });
+  const httpDiskKV = components.httpKV({
+    baseUrl: location.origin + "/?mode=disk",
+  });
   const disk = (globalThis.disk = {
     async keys() {
-      const index = await diskKV.get("!explore.index");
+      const index = await httpDiskKV.get("!explore.index");
       try {
         return typeof index === "string" && index.length > 0
           ? JSON.parse(index)
@@ -104,21 +106,24 @@ async function main(doc) {
       }
     },
     async getItem(key) {
-      return diskKV.get(key);
+      return httpDiskKV.get(key);
     },
     async setItem(key, value) {
       const index = await disk.keys();
       if (index.indexOf(key) === -1) {
-        await diskKV.set("!explore.index", JSON.stringify(index.concat([key])));
+        await httpDiskKV.set(
+          "!explore.index",
+          JSON.stringify(index.concat([key]))
+        );
       }
-      return diskKV.set(key, value);
+      return httpDiskKV.set(key, value);
     },
     async removeItem(key) {
-      await diskKV.set(
+      await httpDiskKV.set(
         "!explore.index",
         JSON.stringify((await globalThis.disk.keys()).filter((x) => x !== key))
       );
-      return diskKV.delete(key);
+      return httpDiskKV.delete(key);
     },
   });
   globalThis.mainFrame = await components.frame({
