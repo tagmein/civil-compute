@@ -128,10 +128,33 @@ async function main() {
               isJs ? "application/javascript" : "text/css"
             );
             console.log("respond with file: " + join(BASE_DIR, request.url));
-            response.end(await readFile(join(BASE_DIR, request.url)));
+            try {
+              response.end(await readFile(join(BASE_DIR, request.url)));
+              return;
+            } catch (e) {}
+          }
+          // console.log(JSON.stringify({ url: request.url }));
+          const pathKey = request.url.split("?")[0].substring(1);
+          console.log(JSON.stringify({ pathKey }));
+          const kv = getKVByMode(requestParams.mode, requestParams);
+          if (pathKey.length > 0) {
+            const isCss = pathKey.endsWith(".css");
+            const isHtml = pathKey.endsWith(".html");
+            const isJs = pathKey.endsWith(".js");
+            response.setHeader(
+              "Content-Type",
+              isJs
+                ? "application/javascript"
+                : isHtml
+                ? "text/html"
+                : isCss
+                ? "text/css"
+                : "text/plain"
+            );
+            response.statusCode = 200;
+            response.end((await kv.get(pathKey)) ?? "");
             return;
           }
-          const kv = getKVByMode(requestParams.mode, requestParams);
           if (typeof requestParams.key !== "string") {
             response.statusCode = 400;
             response.end(

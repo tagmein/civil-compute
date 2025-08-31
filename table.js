@@ -3,7 +3,16 @@ registerComponent(
   async function table(doc, load) {
     return function (components) {
       components.attachStyleSheet("/table.css");
-      return async function (connection, keys, actions, columns, onAction, itemIsPinned, itemSetPinned, itemFilter) {
+      return async function (
+        connection,
+        keys,
+        actions,
+        columns,
+        onAction,
+        itemIsPinned,
+        itemSetPinned,
+        itemFilter
+      ) {
         const table = doc.createElement("table");
         const thead = doc.createElement("thead");
         const thead_tr = doc.createElement("tr");
@@ -21,16 +30,16 @@ registerComponent(
         function applyTableRowOrder() {
           const rows = tbody.children;
           // console.log({ rows });
-          const buckets = new Map()
+          const buckets = new Map();
           for (const row of rows) {
-           const order = row.style.order ? parseInt(row.style.order, 10) : 0;
-           if (!(buckets.has(order))) {
-            buckets.set(order, []);
-           }
-           buckets.get(order).push(row);
+            const order = row.style.order ? parseInt(row.style.order, 10) : 0;
+            if (!buckets.has(order)) {
+              buckets.set(order, []);
+            }
+            buckets.get(order).push(row);
           }
           const allKeys = Array.from(buckets.keys())
-            .map(x => parseInt(x, 10))
+            .map((x) => parseInt(x, 10))
             .sort();
           for (const key of allKeys) {
             for (const row of buckets.get(key)) {
@@ -40,7 +49,7 @@ registerComponent(
         }
         function getItemType(name, value) {
           if (name.endsWith("/") && value.startsWith("!folder")) {
-            return "folder"
+            return "folder";
           }
           return "text";
         }
@@ -50,10 +59,12 @@ registerComponent(
             name: key,
             size: value.length,
             type: getItemType(key, value),
-            value: value.length > 100 ? value.substring(0, 97) + "..." : value,
+            valuePreview:
+              value.length > 100 ? value.substring(0, 97) + "..." : value,
+            value,
           };
           if (!itemFilter(item)) {
-            continue
+            continue;
           }
           // console.log(item)
           const item_tr = doc.createElement("tr");
@@ -76,64 +87,66 @@ registerComponent(
                 break;
               case "!table:star":
               case "!table:pin": {
-               const pinButton = document.createElement("button");
-               pinButton.classList.add("table--pin--button");
-               const pin = document.createElement("span");
-               pin.classList.add("table--pin");
-               const type = col.slice("!table:".length)
-               pin.textContent = type === "star" ? "⭐" : "📌";
-               let isPinned = await itemIsPinned(item, type)
-               function applyState() {
-                 if (isPinned) {
-                   pin.classList.add("pinned");
-                   item_tr.style.order = "0";
-                 }
-                 else {
-                   pin.classList.remove("pinned");
-                   item_tr.style.order = "1";
-                 }
-                 applyTableRowOrder();
-               }
-               applyState()
-               pinButton.addEventListener("click", async function () {
-                 isPinned = !isPinned
-                 pinButton.setAttribute("disabled", "disabled");
-                 await itemSetPinned(item, isPinned, type);
-                 applyState();
-                 pinButton.removeAttribute("disabled", "disabled");
-               });
-               pinButton.appendChild(pin);
-               item_property_td.appendChild(pinButton);
-               break;
+                const pinButton = document.createElement("button");
+                pinButton.classList.add("table--pin--button");
+                const pin = document.createElement("span");
+                pin.classList.add("table--pin");
+                const type = col.slice("!table:".length);
+                pin.textContent = type === "star" ? "⭐" : "📌";
+                let isPinned = await itemIsPinned(item, type);
+                function applyState() {
+                  if (isPinned) {
+                    pin.classList.add("pinned");
+                    item_tr.style.order = "0";
+                  } else {
+                    pin.classList.remove("pinned");
+                    item_tr.style.order = "1";
+                  }
+                  applyTableRowOrder();
+                }
+                applyState();
+                pinButton.addEventListener("click", async function () {
+                  isPinned = !isPinned;
+                  pinButton.setAttribute("disabled", "disabled");
+                  await itemSetPinned(item, isPinned, type);
+                  applyState();
+                  pinButton.removeAttribute("disabled", "disabled");
+                });
+                pinButton.appendChild(pin);
+                item_property_td.appendChild(pinButton);
+                break;
               }
               case "name":
                 if (item.type === "folder") {
                   const nameLink = doc.createElement("a");
                   nameLink.addEventListener("click", function () {
-                    onAction(item, { target: { value: "view" } })
+                    onAction(item, { target: { value: "view" } });
                   });
-                  nameLink.textContent = item[col].substring(0, item[col].length - 1)
+                  nameLink.textContent = item[col].substring(
+                    0,
+                    item[col].length - 1
+                  );
                   item_property_td.appendChild(nameLink);
-                  break
+                  break;
                 }
                 const nameCell = doc.createElement("span");
-                nameCell.textContent = item[col]
+                nameCell.textContent = item[col];
                 item_property_td.appendChild(nameCell);
                 break;
               case "value":
                 if (item.type === "folder") {
-                  break
+                  break;
                 }
                 const valueLink = doc.createElement("a");
                 valueLink.addEventListener("click", function () {
-                  onAction(item, { target: { value: "view" } })
+                  onAction(item, { target: { value: "view" } });
                 });
-                valueLink.textContent = item[col]
+                valueLink.textContent = item.valuePreview;
                 item_property_td.appendChild(valueLink);
-                break
+                break;
               default:
                 const dataCell = doc.createElement("span");
-                dataCell.textContent = item[col]
+                dataCell.textContent = item[col];
                 item_property_td.appendChild(dataCell);
             }
             item_tr.appendChild(item_property_td);
