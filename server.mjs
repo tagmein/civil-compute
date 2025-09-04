@@ -33,7 +33,7 @@ async function main() {
 
   const volatileStore = volatileKV();
 
-  function getKVByMode(mode, params) {
+  function getKVByMode(mode = "disk", params) {
     switch (mode) {
       case "disk":
         return diskKV({
@@ -135,15 +135,29 @@ async function main() {
           }
           // console.log(JSON.stringify({ url: request.url }));
           const pathKey = request.url.split("?")[0].substring(1);
-          console.log(JSON.stringify({ pathKey }));
           const kv = getKVByMode(requestParams.mode, requestParams);
+          async function keys() {
+            const index = await kv.get("!explore.index");
+            try {
+              return typeof index === "string" && index.length > 0
+                ? JSON.parse(index)
+                : [];
+            } catch (e) {
+              console.error(e);
+              return ["Error"];
+            }
+          }
           if (pathKey.length > 0) {
+            console.dir(`GET ${JSON.stringify(pathKey)}`);
             const isCss = pathKey.endsWith(".css");
             const isHtml = pathKey.endsWith(".html");
             const isJs = pathKey.endsWith(".js");
+            const isJson = pathKey.endsWith(".json");
             response.setHeader(
               "Content-Type",
-              isJs
+              isJson
+                ? "application/json"
+                : isJs
                 ? "application/javascript"
                 : isHtml
                 ? "text/html"
@@ -152,7 +166,24 @@ async function main() {
                 : "text/plain"
             );
             response.statusCode = 200;
-            response.end((await kv.get(pathKey)) ?? "");
+            const index = await keys();
+            const value = await kv.get(pathKey);
+            if (typeof value === "string") {
+              // ensure this entry is in the index
+              if (!index.includes(pathKey)) {
+                await kv.set(
+                  "!explore.index",
+                  JSON.stringify([...index, pathKey])
+                );
+              }
+            } else if (index.includes(pathKey)) {
+              // remove this entry from the index
+              await kv.set(
+                "!explore.index",
+                JSON.stringify(index.filter((x) => x !== pathKey))
+              );
+            }
+            response.end(value ?? "");
             return;
           }
           if (typeof requestParams.key !== "string") {

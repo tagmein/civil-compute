@@ -1,0 +1,12 @@
+.raw {
+  float: right;
+}
+
+.external {
+  display: inline-block;
+  font-size: 10px;
+  padding: 0 0 0 2px;
+  position: relative;
+  transform: scale(1, 0.5);
+  vertical-align: top;
+}

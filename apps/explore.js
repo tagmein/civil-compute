@@ -52,6 +52,16 @@ registerComponent(
                 <h4>${toHtml(JSON.stringify(name))}</h4>
                 <section style="word-wrap: anywhere; white-space: preserve;">${fullValue}</section>
               `;
+          const rawLink = document.createElement("a");
+          rawLink.setAttribute("target", "_blank");
+          rawLink.classList.add("raw");
+          rawLink.textContent = "raw";
+          const externalFlag = document.createElement("span");
+          externalFlag.classList.add("external");
+          externalFlag.textContent = "▜";
+          rawLink.appendChild(externalFlag);
+          rawLink.setAttribute("href", name);
+          itemTools.element.firstElementChild.appendChild(rawLink);
           await components.notes(
             activeConnection,
             "!explore.notes",
@@ -131,7 +141,14 @@ registerComponent(
             selectedOption: openLastSet ? "open" : "none",
           }).element
         );
-        const actions = ["", "view", "edit", "copy", "delete"];
+        const actions = [
+          "",
+          "open in new tab",
+          "view",
+          "edit",
+          "copy",
+          "delete",
+        ];
         const columns = [
           "!table:star",
           "name",
@@ -147,6 +164,9 @@ registerComponent(
           switch (value) {
             case "":
               return;
+            case "open in new tab":
+              open(item.name, "_blank");
+              break;
             case "view":
               openItem(item.name);
               break;
