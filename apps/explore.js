@@ -64,7 +64,7 @@ registerComponent(
           itemTools.element.firstElementChild.appendChild(rawLink);
           await components.notes(
             activeConnection,
-            "!explore.notes",
+            "@explore#notes",
             name,
             itemTools.tab("Notes").element
           );
@@ -72,20 +72,20 @@ registerComponent(
         let showSystemEntries = false;
         let openSet = [];
         let openLastSet =
-          (await activeConnection.getItem("!explore.openLastSet")) === "open";
+          (await activeConnection.getItem("@explore#openLastSet")) === "open";
         async function saveLastSet() {
           if (openLastSet) {
             await activeConnection.setItem(
-              "!explore.lastSet",
+              "@explore#lastSet",
               JSON.stringify(openSet)
             );
           } else {
-            await activeConnection.removeItem("!explore.lastSet");
+            await activeConnection.removeItem("@explore#lastSet");
           }
         }
         function itemFilter(item) {
           if (!showSystemEntries) {
-            return !item.name.startsWith("!explore.");
+            return !item.name.startsWith("@explore#");
           }
           return true;
         }
@@ -128,7 +128,7 @@ registerComponent(
           components.select({
             async action(what) {
               openLastSet = what === "open";
-              await activeConnection.setItem("!explore.openLastSet", what);
+              await activeConnection.setItem("@explore#openLastSet", what);
               await saveLastSet();
             },
             options: [
@@ -234,13 +234,13 @@ registerComponent(
         }
         async function itemIsPinned(item, pinType) {
           return activeConnection.getItem(
-            `!explore.${pinType === "pin" ? "pinned" : "pin:" + pinType}:${
+            `@explore#${pinType === "pin" ? "pinned" : "pin:" + pinType}:${
               item.name
             }`
           );
         }
         async function itemSetPinned(item, pinned, pinType) {
-          const key = `!explore.${
+          const key = `@explore#${
             pinType === "pin" ? "pinned" : "pin:" + pinType
           }:${item.name}`;
           if (pinned) {
@@ -279,7 +279,7 @@ registerComponent(
         );
         if (openLastSet) {
           const lastSet = JSON.parse(
-            (await activeConnection.getItem("!explore.lastSet")) ?? "[]"
+            (await activeConnection.getItem("@explore#lastSet")) ?? "[]"
           );
           for (const item of lastSet) {
             await openItem(item);

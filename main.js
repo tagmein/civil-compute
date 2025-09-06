@@ -95,7 +95,7 @@ async function main(doc) {
   });
   const disk = (globalThis.disk = {
     async keys() {
-      const index = await httpDiskKV.get("!explore.index");
+      const index = await httpDiskKV.get("@explore#index");
       try {
         return typeof index === "string" && index.length > 0
           ? JSON.parse(index)
@@ -112,7 +112,7 @@ async function main(doc) {
       const index = await disk.keys();
       if (index.indexOf(key) === -1) {
         await httpDiskKV.set(
-          "!explore.index",
+          "@explore#index",
           JSON.stringify(index.concat([key]))
         );
       }
@@ -120,7 +120,7 @@ async function main(doc) {
     },
     async removeItem(key) {
       await httpDiskKV.set(
-        "!explore.index",
+        "@explore#index",
         JSON.stringify((await globalThis.disk.keys()).filter((x) => x !== key))
       );
       return httpDiskKV.delete(key);

@@ -137,7 +137,7 @@ async function main() {
           const pathKey = request.url.split("?")[0].substring(1);
           const kv = getKVByMode(requestParams.mode, requestParams);
           async function keys() {
-            const index = await kv.get("!explore.index");
+            const index = await kv.get("@explore#index");
             try {
               return typeof index === "string" && index.length > 0
                 ? JSON.parse(index)
@@ -172,14 +172,14 @@ async function main() {
               // ensure this entry is in the index
               if (!index.includes(pathKey)) {
                 await kv.set(
-                  "!explore.index",
+                  "@explore#index",
                   JSON.stringify([...index, pathKey])
                 );
               }
             } else if (index.includes(pathKey)) {
               // remove this entry from the index
               await kv.set(
-                "!explore.index",
+                "@explore#index",
                 JSON.stringify(index.filter((x) => x !== pathKey))
               );
             }
